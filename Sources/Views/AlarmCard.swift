@@ -34,29 +34,34 @@ struct AlarmCard: View {
             Toggle("", isOn: $isToggled)
                 .labelsHidden()
                 .tint(Color(hex: "FF6B6B"))
-                .onChange(of: isToggled) { _, newValue in
+                .onChange(of: isToggled) { newValue in
                     alarmManager.toggleAlarm(alarm)
                 }
         }
         .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(isToggled ? 
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color(hex: "FF6B6B"), Color(hex: "FF8E53")]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ) : 
-                    Color(.systemGray6)
-                )
-        )
+        .background(cardBackground)
         .shadow(color: isToggled ? Color(hex: "FF6B6B").opacity(0.3) : .clear, radius: 8, x: 0, y: 4)
+    }
+    
+    @ViewBuilder
+    private var cardBackground: some View {
+        if isToggled {
+            RoundedRectangle(cornerRadius: 20)
+                .fill(LinearGradient(
+                    gradient: Gradient(colors: [Color(hex: "FF6B6B"), Color(hex: "FF8E53")]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ))
+        } else {
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.systemGray6))
+        }
     }
 }
 
 // MARK: - Preview
 #Preview {
-    AlarmCard(alarm: Alarm(time: Date(), label: "起床啦！", repeatDays: [.monday, .tuesday, .wednesday, .thursday, .friday]))
+    AlarmCard(alarm: Alarm(time: Date(), repeatDays: [.monday, .tuesday, .wednesday, .thursday, .friday], label: "起床啦！"))
         .padding()
         .environmentObject(AlarmManager())
 }

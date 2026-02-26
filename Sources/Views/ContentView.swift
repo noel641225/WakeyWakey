@@ -4,9 +4,35 @@ struct ContentView: View {
     @EnvironmentObject var alarmManager: AlarmManager
     @EnvironmentObject var settingsManager: SettingsManager
     @State private var showingAddAlarm = false
-    @State private var selectedTab = 0
+    @State private var selectedTab = 0  // 0 = 鬧鐘, 1 = 設定
     
     var body: some View {
+        ZStack {
+            // 根據選擇的標籤顯示不同內容
+            switch selectedTab {
+            case 0:
+                alarmPageView
+            case 1:
+                SettingsView()
+            default:
+                alarmPageView
+            }
+            
+            // 底部導航（始終顯示）
+            VStack {
+                Spacer()
+                bottomNavigation
+            }
+        }
+        .sheet(isPresented: $showingAddAlarm) {
+            AddAlarmView()
+                .environmentObject(alarmManager)
+                .environmentObject(settingsManager)
+        }
+    }
+    
+    // MARK: - Alarm Page View
+    private var alarmPageView: some View {
         ZStack {
             // 可愛的背景 gradient
             LinearGradient(
@@ -27,14 +53,9 @@ struct ContentView: View {
                 // 鬧鐘列表
                 alarmListView
                 
-                // 底部導航
-                bottomNavigation
+                Spacer()
+                    .frame(height: 80)
             }
-        }
-        .sheet(isPresented: $showingAddAlarm) {
-            AddAlarmView()
-                .environmentObject(alarmManager)
-                .environmentObject(settingsManager)
         }
     }
     
@@ -106,7 +127,7 @@ struct ContentView: View {
                 selectedTab = 0
             }
             
-            // 新增按鈕 (突出)
+            // 新增按鈕 (突出) - 只在鬧鐘頁顯示
             Button(action: {
                 showingAddAlarm = true
             }) {
@@ -127,6 +148,8 @@ struct ContentView: View {
                         .foregroundColor(.white)
                 }
             }
+            .opacity(selectedTab == 0 ? 1 : 0.5)
+            .disabled(selectedTab != 0)
             
             // 設定按鈕
             navButton(icon: "gearshape.fill", label: "設定", isSelected: selectedTab == 1) {
