@@ -22,7 +22,7 @@ class SettingsManager: ObservableObject {
     }
     
     // MARK: - Save/Load
-    private func saveSettings() {
+    func saveSettings() {
         if let encoded = try? JSONEncoder().encode(settings) {
             userDefaults.set(encoded, forKey: settingsKey)
         }

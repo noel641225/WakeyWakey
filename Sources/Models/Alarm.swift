@@ -12,7 +12,8 @@ struct Alarm: Identifiable, Codable, Equatable {
     var snoozeCount: Int       // 延長次數
     var dismissCount: Int      // 取消所需次數
     var moveSpeed: Double      // 移動速度 0.1~1.0
-    
+    var selectedRingtone: RingtoneSelection
+
     init(
         id: UUID = UUID(),
         time: Date = Date(),
@@ -23,7 +24,8 @@ struct Alarm: Identifiable, Codable, Equatable {
         customImageData: Data? = nil,
         snoozeCount: Int = 1,
         dismissCount: Int = 3,
-        moveSpeed: Double = 0.5
+        moveSpeed: Double = 0.5,
+        selectedRingtone: RingtoneSelection = .default
     ) {
         self.id = id
         self.time = time
@@ -35,6 +37,7 @@ struct Alarm: Identifiable, Codable, Equatable {
         self.snoozeCount = snoozeCount
         self.dismissCount = dismissCount
         self.moveSpeed = moveSpeed
+        self.selectedRingtone = selectedRingtone
     }
     
     var timeString: String {

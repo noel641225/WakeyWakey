@@ -7,15 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0B14EF3EF5FCC6284D18A35D /* WaveformTrimmerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC17398361D81B9574B38DA /* WaveformTrimmerView.swift */; };
 		0BDC600E363076DEC50DFDA2 /* LobsterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CE294A01D471DCFE30935EB /* LobsterView.swift */; };
 		2F60573F5559B2FC23D3E9E9 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12553D9C5D11476A6AACAA6A /* SettingsManager.swift */; };
 		358FD2CF7FD4CD22017F0580 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC4C11508E2441894004266E /* Assets.xcassets */; };
 		361471AD433ABD2E2E039A67 /* AlarmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D6028202D5227E40DF40C7 /* AlarmManager.swift */; };
 		36C8AEF414CA97B5AB87C14F /* WakeyWakeyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7456EC3A0F9C2B715D9C8 /* WakeyWakeyApp.swift */; };
 		4B969DE80FB9F12702025C18 /* AddAlarmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0535852D06DE3B44451FEF4 /* AddAlarmView.swift */; };
+		80E5850FB55FB3A06EE9450C /* RingtoneSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2A21E4C13E4E92C3B69318 /* RingtoneSelection.swift */; };
+		8BB7BCEF81592F7E6740B9C2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3016F6DBB35E57FDC9098765 /* SettingsView.swift */; };
 		911C9656E1D75FCC0499D208 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77F15E8FD4CE35193EF9093 /* AppSettings.swift */; };
+		934F33144278FACDE51DF365 /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75BBB2972DB5BEC13F6FFE2 /* WaveformView.swift */; };
 		B31884F761626889948BB84D /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A6E37EAB0021491630F49C /* Alarm.swift */; };
+		B9DEEAED0A32BA93C0632929 /* RingtonePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312C5AF3A2392D5F32E036F3 /* RingtonePickerView.swift */; };
 		BA9D504A34B681D13FC5E935 /* AlarmCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EA13F45A93ACA478E099324 /* AlarmCard.swift */; };
+		BE30AEAF2B90E66019979243 /* RingtoneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F412D492911C77D75089B5A0 /* RingtoneManager.swift */; };
 		D05FE87B276B53CEEA831458 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6511C23FF43DE550A08696BD /* ContentView.swift */; };
 		D4DF56E1CBA186AA1A3729D2 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013876EA2AB73A1AF15AFA2E /* Color+Hex.swift */; };
 		F5CAFF90579C869C140F9ACC /* BunnyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A98673865A64FAD46C9D720 /* BunnyView.swift */; };
@@ -27,15 +33,21 @@
 		21D6028202D5227E40DF40C7 /* AlarmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmManager.swift; sourceTree = "<group>"; };
 		22A54044F37C4357AE4210DB /* WakeyWakey.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WakeyWakey.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2EA13F45A93ACA478E099324 /* AlarmCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCard.swift; sourceTree = "<group>"; };
+		3016F6DBB35E57FDC9098765 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		312C5AF3A2392D5F32E036F3 /* RingtonePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingtonePickerView.swift; sourceTree = "<group>"; };
 		40A7456EC3A0F9C2B715D9C8 /* WakeyWakeyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeyWakeyApp.swift; sourceTree = "<group>"; };
 		5A2EB4E33B8B3B30B4504C4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5CE294A01D471DCFE30935EB /* LobsterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobsterView.swift; sourceTree = "<group>"; };
 		6511C23FF43DE550A08696BD /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		7F2A21E4C13E4E92C3B69318 /* RingtoneSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingtoneSelection.swift; sourceTree = "<group>"; };
 		9A98673865A64FAD46C9D720 /* BunnyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BunnyView.swift; sourceTree = "<group>"; };
 		B0535852D06DE3B44451FEF4 /* AddAlarmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmView.swift; sourceTree = "<group>"; };
+		CBC17398361D81B9574B38DA /* WaveformTrimmerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformTrimmerView.swift; sourceTree = "<group>"; };
 		D7A6E37EAB0021491630F49C /* Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
 		DC4C11508E2441894004266E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E75BBB2972DB5BEC13F6FFE2 /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
 		E77F15E8FD4CE35193EF9093 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		F412D492911C77D75089B5A0 /* RingtoneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingtoneManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -44,6 +56,7 @@
 			children = (
 				9A98673865A64FAD46C9D720 /* BunnyView.swift */,
 				5CE294A01D471DCFE30935EB /* LobsterView.swift */,
+				E75BBB2972DB5BEC13F6FFE2 /* WaveformView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -54,6 +67,9 @@
 				B0535852D06DE3B44451FEF4 /* AddAlarmView.swift */,
 				2EA13F45A93ACA478E099324 /* AlarmCard.swift */,
 				6511C23FF43DE550A08696BD /* ContentView.swift */,
+				312C5AF3A2392D5F32E036F3 /* RingtonePickerView.swift */,
+				3016F6DBB35E57FDC9098765 /* SettingsView.swift */,
+				CBC17398361D81B9574B38DA /* WaveformTrimmerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -70,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				21D6028202D5227E40DF40C7 /* AlarmManager.swift */,
+				F412D492911C77D75089B5A0 /* RingtoneManager.swift */,
 				12553D9C5D11476A6AACAA6A /* SettingsManager.swift */,
 			);
 			path = Managers;
@@ -94,6 +111,7 @@
 			children = (
 				D7A6E37EAB0021491630F49C /* Alarm.swift */,
 				E77F15E8FD4CE35193EF9093 /* AppSettings.swift */,
+				7F2A21E4C13E4E92C3B69318 /* RingtoneSelection.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -211,8 +229,14 @@
 				D4DF56E1CBA186AA1A3729D2 /* Color+Hex.swift in Sources */,
 				D05FE87B276B53CEEA831458 /* ContentView.swift in Sources */,
 				0BDC600E363076DEC50DFDA2 /* LobsterView.swift in Sources */,
+				BE30AEAF2B90E66019979243 /* RingtoneManager.swift in Sources */,
+				B9DEEAED0A32BA93C0632929 /* RingtonePickerView.swift in Sources */,
+				80E5850FB55FB3A06EE9450C /* RingtoneSelection.swift in Sources */,
 				2F60573F5559B2FC23D3E9E9 /* SettingsManager.swift in Sources */,
+				8BB7BCEF81592F7E6740B9C2 /* SettingsView.swift in Sources */,
 				36C8AEF414CA97B5AB87C14F /* WakeyWakeyApp.swift in Sources */,
+				0B14EF3EF5FCC6284D18A35D /* WaveformTrimmerView.swift in Sources */,
+				934F33144278FACDE51DF365 /* WaveformView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

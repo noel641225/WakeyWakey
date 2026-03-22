@@ -7,6 +7,8 @@ struct AddAlarmView: View {
     @EnvironmentObject var alarmManager: AlarmManager
     @EnvironmentObject var settingsManager: SettingsManager
     
+    @EnvironmentObject var ringtoneManager: RingtoneManager
+
     @State private var alarmTime = Date()
     @State private var alarmLabel = "起床啦！"
     @State private var selectedRepeatDays: Set<Weekday> = []
@@ -14,6 +16,8 @@ struct AddAlarmView: View {
     @State private var snoozeTaps: Int = 1
     @State private var dismissTaps: Int = 3
     @State private var moveSpeed: Double = 0.5
+    @State private var selectedRingtone: RingtoneSelection = .default
+    @State private var showRingtonePicker = false
     
     var body: some View {
         NavigationView {
@@ -39,7 +43,10 @@ struct AddAlarmView: View {
                         
                         // 圖片選擇
                         imageSection
-                        
+
+                        // 鈴聲選擇
+                        ringtoneSection
+
                         // 進階設定
                         advancedSection
                     }
@@ -186,6 +193,42 @@ struct AddAlarmView: View {
         )
     }
     
+    // MARK: - Ringtone Section
+    private var ringtoneSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("🎵 鈴聲")
+                .font(.headline)
+                .foregroundColor(.white)
+
+            Button(action: { showRingtonePicker = true }) {
+                HStack {
+                    Image(systemName: "music.note")
+                        .foregroundColor(Color(hex: "FF6B6B"))
+                    Text(selectedRingtone.displayName)
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.gray)
+                        .font(.system(size: 14))
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemGray6))
+                )
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.ultraThinMaterial)
+        )
+        .sheet(isPresented: $showRingtonePicker) {
+            RingtonePickerView(selectedRingtone: $selectedRingtone)
+                .environmentObject(ringtoneManager)
+        }
+    }
+
     // MARK: - Advanced Section
     private var advancedSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -241,7 +284,8 @@ struct AddAlarmView: View {
             imageType: selectedImageType,
             snoozeCount: snoozeTaps,
             dismissCount: dismissTaps,
-            moveSpeed: moveSpeed
+            moveSpeed: moveSpeed,
+            selectedRingtone: selectedRingtone
         )
         
         alarmManager.addAlarm(alarm)
@@ -254,4 +298,5 @@ struct AddAlarmView: View {
     AddAlarmView()
         .environmentObject(AlarmManager())
         .environmentObject(SettingsManager())
+        .environmentObject(RingtoneManager())
 }
