@@ -34,7 +34,7 @@ struct AlarmCard: View {
             Toggle("", isOn: $isToggled)
                 .labelsHidden()
                 .tint(Color(hex: "FF6B6B"))
-                .onChange(of: isToggled) { newValue in
+                .onChange(of: isToggled) {
                     alarmManager.toggleAlarm(alarm)
                 }
         }
