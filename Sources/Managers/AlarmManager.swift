@@ -1,212 +1,225 @@
 import Foundation
-import Combine
 import UserNotifications
 import UIKit
+import AudioToolbox
 
 // MARK: - Alarm Manager
 class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     @Published var alarms: [Alarm] = []
     @Published var isAlarmTriggering = false
     @Published var currentTriggeringAlarm: Alarm?
-    
+
     private let userDefaults = UserDefaults.standard
     private let alarmsKey = "savedAlarms"
-    
+
     override init() {
         super.init()
         loadAlarms()
         requestNotificationPermission()
-        setupNotificationDelegate()
+        UNUserNotificationCenter.current().delegate = self
+        registerNotificationCategories()
     }
-    
+
     // MARK: - Permission
     private func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge, .criticalAlert]) { granted, error in
-            if let error = error {
-                print("Notification permission error: \(error)")
-            }
-            if granted {
-                print("Notification permission granted")
-            }
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: [.alert, .sound, .badge, .criticalAlert]
+        ) { _, error in
+            if let error { print("Notification permission error: \(error)") }
         }
     }
-    
-    // MARK: - Setup Delegate
-    private func setupNotificationDelegate() {
-        UNUserNotificationCenter.current().delegate = self
-    }
-    
+
     // MARK: - UNUserNotificationCenterDelegate
-    func userNotificationCenter(_ center: UNUserNotificationCenter, 
-                                willPresent notification: UNNotification, 
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        // App 在前台時也要顯示通知
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
         completionHandler([.banner, .sound, .badge])
-        
-        // 觸發鬧鐘
-        let alarmId = notification.request.identifier
-        if let alarm = alarms.first(where: { $0.id.uuidString == alarmId }) {
-            DispatchQueue.main.async {
-                self.triggerAlarm(alarm)
-            }
+        if let alarm = alarm(for: notification.request.identifier) {
+            DispatchQueue.main.async { self.triggerAlarm(alarm) }
         }
     }
-    
-    func userNotificationCenter(_ center: UNUserNotificationCenter, 
-                                didReceive response: UNNotificationResponse, 
-                                withCompletionHandler completionHandler: @escaping () -> Void) {
-        let alarmId = response.notification.request.identifier
-        if let alarm = alarms.first(where: { $0.id.uuidString == alarmId }) {
-            DispatchQueue.main.async {
-                self.triggerAlarm(alarm)
-            }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        if let alarm = alarm(for: response.notification.request.identifier) {
+            DispatchQueue.main.async { self.triggerAlarm(alarm) }
         }
         completionHandler()
     }
-    
-    // MARK: - CRUD Operations
+
+    /// Extracts the matching Alarm from a notification identifier.
+    /// Handles formats: "uuid", "uuid_weekday", "uuid_snooze"
+    private func alarm(for notificationId: String) -> Alarm? {
+        let uuidString = notificationId.components(separatedBy: "_").first ?? notificationId
+        guard let id = UUID(uuidString: uuidString) else { return nil }
+        return alarms.first(where: { $0.id == id })
+    }
+
+    // MARK: - CRUD
+
     func addAlarm(_ alarm: Alarm) {
         alarms.append(alarm)
         saveAlarms()
-        scheduleNotification(for: alarm)
+        if alarm.isEnabled { scheduleNotifications(for: alarm) }
     }
-    
+
     func updateAlarm(_ alarm: Alarm) {
-        if let index = alarms.firstIndex(where: { $0.id == alarm.id }) {
-            alarms[index] = alarm
-            saveAlarms()
-            
-            // 重新安排通知
-            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [alarm.id.uuidString])
-            if alarm.isEnabled {
-                scheduleNotification(for: alarm)
-            }
-        }
+        guard let index = alarms.firstIndex(where: { $0.id == alarm.id }) else { return }
+        cancelAllNotifications(for: alarms[index])
+        alarms[index] = alarm
+        saveAlarms()
+        if alarm.isEnabled { scheduleNotifications(for: alarm) }
     }
-    
+
     func deleteAlarm(_ alarm: Alarm) {
+        cancelAllNotifications(for: alarm)
         alarms.removeAll { $0.id == alarm.id }
         saveAlarms()
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [alarm.id.uuidString])
     }
-    
+
     func toggleAlarm(_ alarm: Alarm) {
-        if let index = alarms.firstIndex(where: { $0.id == alarm.id }) {
-            alarms[index].isEnabled.toggle()
-            saveAlarms()
-            
-            if alarms[index].isEnabled {
-                scheduleNotification(for: alarms[index])
-            } else {
-                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [alarm.id.uuidString])
-            }
+        guard let index = alarms.firstIndex(where: { $0.id == alarm.id }) else { return }
+        alarms[index].isEnabled.toggle()
+        saveAlarms()
+        if alarms[index].isEnabled {
+            scheduleNotifications(for: alarms[index])
+        } else {
+            cancelAllNotifications(for: alarm)
         }
     }
-    
+
     // MARK: - Storage
+
     private func saveAlarms() {
         if let encoded = try? JSONEncoder().encode(alarms) {
             userDefaults.set(encoded, forKey: alarmsKey)
         }
     }
-    
+
     private func loadAlarms() {
-        if let data = userDefaults.data(forKey: alarmsKey),
-           let decoded = try? JSONDecoder().decode([Alarm].self, from: data) {
-            alarms = decoded
-        }
+        guard let data = userDefaults.data(forKey: alarmsKey),
+              let decoded = try? JSONDecoder().decode([Alarm].self, from: data) else { return }
+        alarms = decoded
     }
-    
-    // MARK: - Notification
-    private func scheduleNotification(for alarm: Alarm) {
+
+    // MARK: - Notification Scheduling
+
+    private func scheduleNotifications(for alarm: Alarm) {
         let content = UNMutableNotificationContent()
         content.title = "Wakey Wakey! ⏰"
         content.body = alarm.label.isEmpty ? "起床時間到囉！" : alarm.label
         content.sound = .default
         content.badge = 1
         content.categoryIdentifier = "ALARM_CATEGORY"
-        
+
         let calendar = Calendar.current
-        var components = calendar.dateComponents([.hour, .minute], from: alarm.time)
-        components.second = 0
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
-        let request = UNNotificationRequest(identifier: alarm.id.uuidString, content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Schedule error: \(error.localizedDescription)")
-            } else {
-                print("Alarm scheduled for \(components.hour ?? 0):\(components.minute ?? 0)")
+        var baseComponents = calendar.dateComponents([.hour, .minute], from: alarm.time)
+        baseComponents.second = 0
+
+        if alarm.repeatDays.isEmpty {
+            // One-time alarm at next occurrence of this hour:minute
+            let trigger = UNCalendarNotificationTrigger(
+                dateMatching: baseComponents,
+                repeats: false
+            )
+            let request = UNNotificationRequest(
+                identifier: alarm.id.uuidString,
+                content: content,
+                trigger: trigger
+            )
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error { print("Schedule error: \(error)") }
+            }
+        } else {
+            // Weekly repeating notification for each selected weekday
+            for weekday in alarm.repeatDays {
+                var components = baseComponents
+                components.weekday = weekday.rawValue
+                let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+                let id = "\(alarm.id.uuidString)_\(weekday.rawValue)"
+                let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+                UNUserNotificationCenter.current().add(request) { error in
+                    if let error { print("Schedule error weekday \(weekday.rawValue): \(error)") }
+                }
             }
         }
-        
-        // 註冊通知類別
-        registerNotificationCategories()
     }
-    
+
+    /// Cancels all pending notifications for an alarm (one-time, all weekdays, and snooze).
+    private func cancelAllNotifications(for alarm: Alarm) {
+        var ids = [alarm.id.uuidString, "\(alarm.id.uuidString)_snooze"]
+        ids += (1...7).map { "\(alarm.id.uuidString)_\($0)" }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+    }
+
     private func registerNotificationCategories() {
         let snoozeAction = UNNotificationAction(
             identifier: "SNOOZE_ACTION",
             title: "延長 5 分鐘",
             options: []
         )
-        
         let dismissAction = UNNotificationAction(
             identifier: "DISMISS_ACTION",
             title: "關閉",
             options: [.destructive]
         )
-        
-        let alarmCategory = UNNotificationCategory(
+        let category = UNNotificationCategory(
             identifier: "ALARM_CATEGORY",
             actions: [snoozeAction, dismissAction],
             intentIdentifiers: [],
             options: [.customDismissAction]
         )
-        
-        UNUserNotificationCenter.current().setNotificationCategories([alarmCategory])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
     }
-    
-    // MARK: - Trigger Alarm
+
+    // MARK: - Trigger / Dismiss / Snooze
+
     func triggerAlarm(_ alarm: Alarm) {
         currentTriggeringAlarm = alarm
         isAlarmTriggering = true
-        
-        // 震動
         AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-        
-        // 播放聲音（如果需要）
-        // 可以添加自定義聲音
     }
-    
+
     func dismissAlarm() {
         isAlarmTriggering = false
         currentTriggeringAlarm = nil
-        
-        // 清除 badge
-        DispatchQueue.main.async {
-            UIApplication.shared.applicationIconBadgeNumber = 0
+        UNUserNotificationCenter.current().setBadgeCount(0, withCompletionHandler: nil)
+    }
+
+    /// Schedules a one-time snooze notification without corrupting the stored alarm time.
+    func snoozeAlarm(alarm: Alarm, duration: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = "Wakey Wakey! ⏰"
+        content.body = alarm.label.isEmpty ? "起床時間到囉！" : alarm.label
+        content.sound = .default
+        content.badge = 1
+        content.categoryIdentifier = "ALARM_CATEGORY"
+
+        let trigger = UNTimeIntervalNotificationTrigger(
+            timeInterval: TimeInterval(duration * 60),
+            repeats: false
+        )
+        let snoozeId = "\(alarm.id.uuidString)_snooze"
+        let request = UNNotificationRequest(identifier: snoozeId, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error { print("Snooze schedule error: \(error)") }
         }
+        dismissAlarm()
     }
-    
-    func snoozeAlarm() {
-        guard var alarm = currentTriggeringAlarm else { return }
-        
-        // 延長 5 分鐘
-        alarm.time = Date().addingTimeInterval(60 * 5)
-        updateAlarm(alarm)
-        
-        isAlarmTriggering = false
-        currentTriggeringAlarm = nil
-    }
-    
+
     // MARK: - Debug
+
     func printScheduledNotifications() {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
             print("=== Pending Notifications ===")
-            for request in requests {
-                print("ID: \(request.identifier), Trigger: \(request.trigger?.description ?? "N/A")")
+            for r in requests {
+                print("ID: \(r.identifier), Trigger: \(r.trigger?.description ?? "N/A")")
             }
             print("=============================")
         }

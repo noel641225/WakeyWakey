@@ -189,7 +189,6 @@ struct SettingsView: View {
             Button("取消", role: .cancel) {}
             Button("確認", role: .destructive) {
                 settingsManager.settings = AppSettings()
-                settingsManager.saveSettings()
             }
         } message: {
             Text("確定要重置所有設置嗎？")
