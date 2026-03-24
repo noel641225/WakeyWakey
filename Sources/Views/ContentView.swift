@@ -39,6 +39,8 @@ struct ContentView: View {
                 AlarmFiringView(alarm: alarm)
                     .environmentObject(alarmManager)
                     .environmentObject(settingsManager)
+            } else {
+                Color.clear.onAppear { alarmManager.dismissAlarm() }
             }
         }
     }
@@ -81,24 +83,33 @@ struct ContentView: View {
         .background(Color.ghibliCream.opacity(0.85))
     }
 
-    // MARK: - Alarm List
+    // MARK: - Alarm List (with swipe-to-delete)
     private var alarmListView: some View {
-        ScrollView {
-            LazyVStack(spacing: 14) {
-                if alarmManager.alarms.isEmpty {
-                    emptyStateView
-                } else {
-                    ForEach(alarmManager.alarms) { alarm in
-                        AlarmCard(alarm: alarm)
-                            .transition(.asymmetric(insertion: .scale.combined(with: .opacity),
-                                                    removal: .opacity))
-                    }
+        List {
+            if alarmManager.alarms.isEmpty {
+                emptyStateView
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets())
+            } else {
+                ForEach(alarmManager.alarms) { alarm in
+                    AlarmCard(alarm: alarm)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                alarmManager.deleteAlarm(alarm)
+                            } label: {
+                                Label("刪除", systemImage: "trash")
+                            }
+                        }
                 }
             }
-            .padding(.horizontal, 18)
-            .padding(.top, 12)
-            .padding(.bottom, 100)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .padding(.bottom, 20)
     }
 
     // MARK: - Empty State
@@ -117,6 +128,7 @@ struct ContentView: View {
                 .multilineTextAlignment(.center)
         }
         .padding(.vertical, 50)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Bottom Navigation

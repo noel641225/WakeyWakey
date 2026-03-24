@@ -1,8 +1,12 @@
 import SwiftUI
+import AudioToolbox
 
 // MARK: - Alarm Firing View
+// Fullscreen overlay shown when an alarm triggers.
+// The mascot moves around the screen; user must tap it `dismissCount` times to dismiss.
 struct AlarmFiringView: View {
     @EnvironmentObject var alarmManager: AlarmManager
+    @EnvironmentObject var settingsManager: SettingsManager
     let alarm: Alarm
 
     // Chase-and-tap state
@@ -11,11 +15,21 @@ struct AlarmFiringView: View {
     @State private var characterScale: CGFloat = 1.0
     @State private var bounceAnimation = false
     @State private var moveTimer: Timer?
+    @State private var vibrateTimer: Timer?
     @State private var showDismissed = false
+    @State private var snoozeUsed: Int = 0
+    @State private var screenSize: CGSize = .zero
+    @State private var isReady = false
 
     @StateObject private var animator = SpriteAnimator(fps: 6)
 
     private var dismissTapsRequired: Int { alarm.dismissCount }
+    private var canSnooze: Bool { snoozeUsed < alarm.snoozeCount }
+
+    // Movement interval: fast at moveSpeed 1.0 (0.3s), slow at 0.1 (3.0s)
+    private var moveInterval: TimeInterval {
+        3.3 - 3.0 * alarm.moveSpeed
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -26,14 +40,18 @@ struct AlarmFiringView: View {
                 VStack(spacing: 0) {
                     alarmInfoPanel
                     Spacer()
-                    snoozeButton
-                        .padding(.bottom, 48)
+                    if canSnooze {
+                        snoozeButton
+                            .padding(.bottom, 48)
+                    }
                 }
 
                 // Animated character (chase to tap)
-                characterView
-                    .position(characterPosition)
-                    .animation(.spring(response: 0.6, dampingFraction: 0.65), value: characterPosition)
+                if isReady {
+                    characterView
+                        .position(characterPosition)
+                        .animation(.spring(response: 0.6, dampingFraction: 0.65), value: characterPosition)
+                }
 
                 // Tap progress indicator
                 tapProgressView
@@ -44,13 +62,21 @@ struct AlarmFiringView: View {
                 }
             }
             .onAppear {
-                spawnCharacter(in: geo.size)
-                startMoving(in: geo.size)
+                screenSize = geo.size
+                characterPosition = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+                isReady = true
                 animator.startAnimation(state: .moving)
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    startMoving(in: geo.size)
+                }
+                startVibrating()
             }
             .onDisappear {
                 moveTimer?.invalidate()
                 moveTimer = nil
+                vibrateTimer?.invalidate()
+                vibrateTimer = nil
                 animator.stopAnimation()
             }
         }
@@ -110,8 +136,8 @@ struct AlarmFiringView: View {
 
     // MARK: - Snooze Button
     private var snoozeButton: some View {
-        Button(action: { alarmManager.snoozeAlarm() }) {
-            Label("延長 5 分鐘", systemImage: "moon.zzz.fill")
+        Button(action: handleSnooze) {
+            Label("延長 \(settingsManager.snoozeDuration) 分鐘", systemImage: "moon.zzz.fill")
                 .font(GhibliTheme.Typography.body(15))
         }
         .ghibliButton(.secondary)
@@ -141,6 +167,9 @@ struct AlarmFiringView: View {
         withAnimation(.spring(response: 0.15, dampingFraction: 0.4)) {
             characterScale = 0.8
         }
+        // Haptic feedback
+        AudioServicesPlaySystemSound(1519) // Peek haptic
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) {
                 characterScale = 1.0
@@ -148,15 +177,24 @@ struct AlarmFiringView: View {
             animator.transition(to: .moving)
         }
 
+        // Jump away on tap
+        moveMascot(in: screenSize)
+
         tapCount += 1
         if tapCount >= dismissTapsRequired {
             dismissAlarm()
         }
     }
 
+    private func handleSnooze() {
+        snoozeUsed += 1
+        alarmManager.snoozeAlarm(alarm: alarm, duration: settingsManager.snoozeDuration)
+    }
+
     // MARK: - Dismiss
     private func dismissAlarm() {
         moveTimer?.invalidate()
+        vibrateTimer?.invalidate()
         animator.transition(to: .dismissed)
         withAnimation(.easeInOut(duration: 0.4)) {
             showDismissed = true
@@ -167,26 +205,39 @@ struct AlarmFiringView: View {
     }
 
     // MARK: - Movement
-    private func spawnCharacter(in size: CGSize) {
-        characterPosition = CGPoint(x: size.width / 2, y: size.height * 0.52)
-    }
-
     private func startMoving(in size: CGSize) {
-        let speed = max(0.6, alarm.moveSpeed)
-        let interval = 2.2 / speed
-        moveTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
-            Task { @MainActor in
-                moveCharacter(in: size)
-            }
+        moveMascot(in: size) // first jump
+
+        let timer = Timer.scheduledTimer(withTimeInterval: moveInterval, repeats: true) { _ in
+            moveMascot(in: size)
         }
-        RunLoop.main.add(moveTimer!, forMode: .common)
+        RunLoop.main.add(timer, forMode: .common)
+        moveTimer = timer
     }
 
-    private func moveCharacter(in size: CGSize) {
-        let padding: CGFloat = 60
-        let newX = CGFloat.random(in: padding...(size.width - padding))
-        let newY = CGFloat.random(in: size.height * 0.38...(size.height * 0.72))
-        characterPosition = CGPoint(x: newX, y: newY)
+    private func moveMascot(in size: CGSize) {
+        let pad: CGFloat = 70
+        let topPad: CGFloat = 240    // avoid top info area
+        let bottomPad: CGFloat = 130 // avoid snooze button
+
+        let minX = pad
+        let maxX = max(minX + 1, size.width - pad)
+        let minY = topPad
+        let maxY = max(minY + 1, size.height - bottomPad)
+
+        characterPosition = CGPoint(
+            x: CGFloat.random(in: minX...maxX),
+            y: CGFloat.random(in: minY...maxY)
+        )
+    }
+
+    // MARK: - Vibration Loop
+    private func startVibrating() {
+        let timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
+            AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        vibrateTimer = timer
     }
 }
 
