@@ -6,6 +6,7 @@ struct AddAlarmView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var alarmManager: AlarmManager
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var ringtoneManager: RingtoneManager
 
     @State private var alarmTime = Date()
     @State private var alarmLabel = "起床啦！"
@@ -14,7 +15,8 @@ struct AddAlarmView: View {
     @State private var snoozeTaps: Int = 1
     @State private var dismissTaps: Int = 3
     @State private var moveSpeed: Double = 0.5
-
+    @State private var selectedRingtone: RingtoneSelection = .default
+    @State private var showRingtonePicker = false
     var body: some View {
         NavigationView {
             ZStack {
@@ -27,6 +29,11 @@ struct AddAlarmView: View {
                         repeatSection
                         labelSection
                         imageSection
+
+                        // 鈴聲選擇
+                        ringtoneSection
+
+                        // 進階設定
                         advancedSection
                     }
                     .padding(18)
@@ -152,6 +159,41 @@ struct AddAlarmView: View {
         .ghibliCard()
     }
 
+    // MARK: - Ringtone Section
+    private var ringtoneSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("🎵 鈴聲")
+
+            Button(action: { showRingtonePicker = true }) {
+                HStack {
+                    Image(systemName: "music.note")
+                        .foregroundColor(Color.ghibliForestGreen)
+                    Text(selectedRingtone.displayName)
+                        .font(GhibliTheme.Typography.body(15))
+                        .foregroundColor(Color.ghibliDeepForest)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(Color.ghibleBarkBrown.opacity(0.6))
+                        .font(.system(size: 14))
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
+                        .fill(Color.ghibliCream)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
+                                .stroke(Color.ghibliWarmEarth.opacity(0.3), lineWidth: 1)
+                        )
+                )
+            }
+        }
+        .ghibliCard()
+        .sheet(isPresented: $showRingtonePicker) {
+            RingtonePickerView(selectedRingtone: $selectedRingtone)
+                .environmentObject(ringtoneManager)
+        }
+    }
+
     // MARK: - Advanced Section
     private var advancedSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -213,7 +255,8 @@ struct AddAlarmView: View {
             imageType: selectedImageType,
             snoozeCount: snoozeTaps,
             dismissCount: dismissTaps,
-            moveSpeed: moveSpeed
+            moveSpeed: moveSpeed,
+            selectedRingtone: selectedRingtone
         )
         alarmManager.addAlarm(alarm)
         dismiss()
@@ -224,4 +267,5 @@ struct AddAlarmView: View {
     AddAlarmView()
         .environmentObject(AlarmManager())
         .environmentObject(SettingsManager())
+        .environmentObject(RingtoneManager())
 }

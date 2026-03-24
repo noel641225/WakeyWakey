@@ -3,15 +3,21 @@ import Combine
 import UserNotifications
 import UIKit
 import AudioToolbox
+import AVFoundation
 
 // MARK: - Alarm Manager
 class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     @Published var alarms: [Alarm] = []
     @Published var isAlarmTriggering = false
     @Published var currentTriggeringAlarm: Alarm?
-    
+
     private let userDefaults = UserDefaults.standard
     private let alarmsKey = "savedAlarms"
+
+    // Audio player for in-app alarm sound
+    private var alarmAudioPlayer: AVAudioPlayer?
+    private var alarmAudioEngine: AVAudioEngine?
+    private var alarmToneNode: AVAudioPlayerNode?
     
     override init() {
         super.init()
@@ -123,7 +129,13 @@ class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate
         let content = UNMutableNotificationContent()
         content.title = "Wakey Wakey! ⏰"
         content.body = alarm.label.isEmpty ? "起床時間到囉！" : alarm.label
-        content.sound = .default
+        // Use custom sound file if available, otherwise default
+        if alarm.selectedRingtone.type == .custom,
+           let fileName = alarm.selectedRingtone.customFileName {
+            content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: fileName))
+        } else {
+            content.sound = .default
+        }
         content.badge = 1
         content.categoryIdentifier = "ALARM_CATEGORY"
         
@@ -173,33 +185,111 @@ class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate
     func triggerAlarm(_ alarm: Alarm) {
         currentTriggeringAlarm = alarm
         isAlarmTriggering = true
-        
-        // 震動
+
+        // Vibrate
         AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-        
-        // 播放聲音（如果需要）
-        // 可以添加自定義聲音
+
+        // Play ringtone
+        startRingtonePlayback(for: alarm.selectedRingtone)
     }
-    
+
     func dismissAlarm() {
+        stopRingtonePlayback()
         isAlarmTriggering = false
         currentTriggeringAlarm = nil
-        
-        // 清除 badge
+
         DispatchQueue.main.async {
             UIApplication.shared.applicationIconBadgeNumber = 0
         }
     }
-    
+
     func snoozeAlarm() {
+        stopRingtonePlayback()
         guard var alarm = currentTriggeringAlarm else { return }
-        
-        // 延長 5 分鐘
+
         alarm.time = Date().addingTimeInterval(60 * 5)
         updateAlarm(alarm)
-        
+
         isAlarmTriggering = false
         currentTriggeringAlarm = nil
+    }
+
+    // MARK: - Ringtone Playback
+    private func startRingtonePlayback(for selection: RingtoneSelection) {
+        stopRingtonePlayback()
+        setupAlarmAudioSession()
+
+        if selection.type == .custom, let fileName = selection.customFileName {
+            let fileURL = RingtoneManager.soundsDirectory.appendingPathComponent(fileName)
+            do {
+                let player = try AVAudioPlayer(contentsOf: fileURL)
+                player.numberOfLoops = -1
+                player.play()
+                alarmAudioPlayer = player
+            } catch {
+                playPresetTone(selection.preset ?? .classic)
+            }
+        } else {
+            playPresetTone(selection.preset ?? .classic)
+        }
+    }
+
+    private func playPresetTone(_ preset: PresetRingtone) {
+        let sampleRate: Double = 44100
+        let onFrames  = AVAudioFrameCount(sampleRate * preset.onDuration)
+        let offFrames = AVAudioFrameCount(sampleRate * preset.offDuration)
+        let total     = onFrames + offFrames
+
+        guard let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1),
+              let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: total),
+              let channelData = buffer.floatChannelData?[0] else { return }
+
+        buffer.frameLength = total
+        let freq      = preset.frequency
+        let harmonics = preset.harmonics
+
+        for i in 0..<Int(onFrames) {
+            let t       = Double(i) / sampleRate
+            let attack  = min(1.0, Double(i)           / (sampleRate * 0.015))
+            let release = min(1.0, Double(Int(onFrames) - i) / (sampleRate * 0.015))
+            let env     = min(attack, release) * 0.5
+            var sample  = 0.0
+            for (hi, amplitude) in harmonics.enumerated() {
+                sample += amplitude * sin(2.0 * Double.pi * freq * Double(hi + 1) * t)
+            }
+            channelData[i] = Float(sample * env / Double(harmonics.count))
+        }
+        for i in 0..<Int(offFrames) { channelData[Int(onFrames) + i] = 0 }
+
+        let engine = AVAudioEngine()
+        let player = AVAudioPlayerNode()
+        engine.attach(player)
+        engine.connect(player, to: engine.mainMixerNode, format: format)
+
+        do {
+            try engine.start()
+            player.scheduleBuffer(buffer, at: nil, options: [.loops], completionHandler: nil)
+            player.play()
+            alarmAudioEngine = engine
+            alarmToneNode    = player
+        } catch {
+            print("Alarm tone error: \(error)")
+        }
+    }
+
+    private func stopRingtonePlayback() {
+        alarmAudioPlayer?.stop()
+        alarmToneNode?.stop()
+        alarmAudioEngine?.stop()
+        alarmAudioPlayer = nil
+        alarmToneNode    = nil
+        alarmAudioEngine = nil
+    }
+
+    private func setupAlarmAudioSession() {
+        try? AVAudioSession.sharedInstance().setCategory(
+            .playback, mode: .default, options: [])
+        try? AVAudioSession.sharedInstance().setActive(true)
     }
     
     // MARK: - Debug

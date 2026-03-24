@@ -4,6 +4,7 @@ import SwiftUI
 struct WakeyWakeyApp: App {
     @StateObject private var alarmManager = AlarmManager()
     @StateObject private var settingsManager = SettingsManager()
+    @StateObject private var ringtoneManager = RingtoneManager()
 
     init() {
         GhibliNavigationStyle.applyGlobalAppearance()
@@ -14,6 +15,7 @@ struct WakeyWakeyApp: App {
             ContentView()
                 .environmentObject(alarmManager)
                 .environmentObject(settingsManager)
+                .environmentObject(ringtoneManager)
                 .tint(Color.ghibliForestGreen)
         }
     }

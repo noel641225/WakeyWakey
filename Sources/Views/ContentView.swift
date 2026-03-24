@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var alarmManager: AlarmManager
     @EnvironmentObject var settingsManager: SettingsManager
+    @EnvironmentObject var ringtoneManager: RingtoneManager
     @State private var showingAddAlarm = false
     @State private var selectedTab = 0  // 0 = 鬧鐘, 1 = 設定
     @StateObject private var headerAnimator = SpriteAnimator(fps: 4)
@@ -28,6 +29,7 @@ struct ContentView: View {
             AddAlarmView()
                 .environmentObject(alarmManager)
                 .environmentObject(settingsManager)
+                .environmentObject(ringtoneManager)
         }
         .fullScreenCover(isPresented: Binding(
             get: { alarmManager.isAlarmTriggering && alarmManager.currentTriggeringAlarm != nil },
@@ -183,4 +185,5 @@ struct ContentView: View {
     ContentView()
         .environmentObject(AlarmManager())
         .environmentObject(SettingsManager())
+        .environmentObject(RingtoneManager())
 }
