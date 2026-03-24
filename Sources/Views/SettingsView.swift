@@ -4,95 +4,82 @@ struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var alarmManager: AlarmManager
     @State private var showingResetAlert = false
-    
+    @StateObject private var headerAnimator = SpriteAnimator(fps: 3)
+
     var body: some View {
         ZStack {
-            // 背景 gradient
+            // Warm cozy indoor background
             LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(hex: "FFB6C1"),
-                    Color(hex: "E6E6FA"),
-                    Color(hex: "B0E0E6")
-                ]),
+                colors: [Color.ghibliCream, Color.ghibliParchment.opacity(0.8), Color.ghibliSoftSky.opacity(0.25)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
+
             ScrollView {
                 VStack(spacing: 20) {
-                    // 標題
                     headerView
-                    
+
                     // 鬧鐘設置
-                    settingsSection(title: "鬧鐘設置") {
+                    settingsSection(title: "🔔 鬧鐘設置") {
                         VStack(spacing: 16) {
-                            // 延長分鐘數
-                            HStack {
+                            settingsRow {
                                 Text("延長分鐘數")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
+                                    .font(GhibliTheme.Typography.body(16))
+                                    .foregroundColor(Color.ghibliDeepForest)
                                 Spacer()
-                                Stepper("\(settingsManager.snoozeDuration) 分鐘", 
-                                        value: $settingsManager.settings.snoozeDuration, 
+                                Stepper("\(settingsManager.snoozeDuration) 分鐘",
+                                        value: $settingsManager.settings.snoozeDuration,
                                         in: 1...30)
-                                    .labelsHidden()
+                                .tint(Color.ghibliForestGreen)
                             }
-                            
-                            Divider().background(Color.white.opacity(0.3))
-                            
-                            // 取消需要點擊次數
-                            HStack {
+                            ghibliDivider
+                            settingsRow {
                                 Text("取消需要點擊次數")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
+                                    .font(GhibliTheme.Typography.body(16))
+                                    .foregroundColor(Color.ghibliDeepForest)
                                 Spacer()
-                                Stepper("\(settingsManager.settings.defaultDismissTaps) 次", 
-                                        value: $settingsManager.settings.defaultDismissTaps, 
+                                Stepper("\(settingsManager.settings.defaultDismissTaps) 次",
+                                        value: $settingsManager.settings.defaultDismissTaps,
                                         in: 1...10)
-                                    .labelsHidden()
+                                .tint(Color.ghibliForestGreen)
                             }
                         }
                     }
-                    
+
                     // 通知設置
-                    settingsSection(title: "通知設置") {
+                    settingsSection(title: "🔊 通知設置") {
                         VStack(spacing: 16) {
-                            // 音量
-                            HStack {
+                            settingsRow {
                                 Text("音量")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
+                                    .font(GhibliTheme.Typography.body(16))
+                                    .foregroundColor(Color.ghibliDeepForest)
                                 Spacer()
-                                Slider(value: $settingsManager.settings.soundVolume, 
-                                       in: 0...1)
-                                    .frame(width: 150)
+                                Slider(value: $settingsManager.settings.soundVolume, in: 0...1)
+                                    .frame(width: 140)
+                                    .tint(Color.ghibliForestGreen)
                                 Text("\(Int(settingsManager.settings.soundVolume * 100))%")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.white.opacity(0.8))
-                                    .frame(width: 40)
+                                    .font(GhibliTheme.Typography.body(14))
+                                    .foregroundColor(Color.ghibliWarmEarth)
+                                    .frame(width: 38)
                             }
-                            
-                            Divider().background(Color.white.opacity(0.3))
-                            
-                            // 震動
+                            ghibliDivider
                             Toggle(isOn: $settingsManager.settings.vibrationEnabled) {
                                 Text("震動")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
+                                    .font(GhibliTheme.Typography.body(16))
+                                    .foregroundColor(Color.ghibliDeepForest)
                             }
-                            .tint(Color(hex: "FF6B6B"))
+                            .toggleStyle(GhibliToggleStyle())
                         }
                     }
-                    
+
                     // AI 設置
-                    settingsSection(title: "AI 設置") {
+                    settingsSection(title: "✨ AI 設置") {
                         VStack(spacing: 16) {
-                            // AI 供應商
-                            HStack {
+                            settingsRow {
                                 Text("AI 供應商")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
+                                    .font(GhibliTheme.Typography.body(16))
+                                    .foregroundColor(Color.ghibliDeepForest)
                                 Spacer()
                                 Picker("", selection: $settingsManager.settings.aiProvider) {
                                     ForEach(AIProviderType.allCases) { provider in
@@ -100,88 +87,86 @@ struct SettingsView: View {
                                     }
                                 }
                                 .pickerStyle(.menu)
-                                .tint(Color(hex: "FF6B6B"))
+                                .tint(Color.ghibliForestGreen)
                             }
-                            
-                            // API Key (如果需要)
+
                             if settingsManager.settings.aiProvider == .userCustom {
-                                Divider().background(Color.white.opacity(0.3))
-                                
-                                SecureField("輸入 API Key", 
+                                ghibliDivider
+                                SecureField("輸入 API Key",
                                            text: Binding(
                                                get: { settingsManager.settings.userAPIKey ?? "" },
                                                set: { settingsManager.settings.userAPIKey = $0 }
                                            ))
-                                    .textFieldStyle(.roundedBorder)
+                                .font(GhibliTheme.Typography.body(15))
+                                .padding(12)
+                                .background(
+                                    RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
+                                        .fill(Color.ghibliCream)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
+                                                .stroke(Color.ghibliWarmEarth.opacity(0.3), lineWidth: 1)
+                                        )
+                                )
                             }
-                            
-                            Divider().background(Color.white.opacity(0.3))
-                            
-                            // 剩餘免費次數
-                            HStack {
+
+                            ghibliDivider
+                            settingsRow {
                                 Text("剩餘免費次數")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
+                                    .font(GhibliTheme.Typography.body(16))
+                                    .foregroundColor(Color.ghibliDeepForest)
                                 Spacer()
                                 Text("\(settingsManager.settings.freeQuotaRemaining) 次")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(Color(hex: "FF6B6B"))
+                                    .font(GhibliTheme.Typography.heading(16))
+                                    .foregroundColor(Color.ghibliForestGreen)
                             }
                         }
                     }
-                    
+
                     // 數據管理
-                    settingsSection(title: "數據管理") {
+                    settingsSection(title: "🗂️ 數據管理") {
                         VStack(spacing: 16) {
-                            Button(action: {
-                                showingResetAlert = true
-                            }) {
+                            Button(action: { showingResetAlert = true }) {
                                 HStack {
                                     Text("重置所有設置")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(.white)
+                                        .font(GhibliTheme.Typography.body(16))
+                                        .foregroundColor(Color.ghibliWarmEarth)
                                     Spacer()
                                     Image(systemName: "arrow.counterclockwise")
-                                        .foregroundColor(.white)
+                                        .foregroundColor(Color.ghibliWarmEarth)
                                 }
                             }
-                            
-                            Divider().background(Color.white.opacity(0.3))
-                            
+                            ghibliDivider
                             Button(action: {
-                                // 刪除所有鬧鐘
                                 for alarm in alarmManager.alarms {
                                     alarmManager.deleteAlarm(alarm)
                                 }
                             }) {
                                 HStack {
                                     Text("刪除所有鬧鐘")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(.white)
+                                        .font(GhibliTheme.Typography.body(16))
+                                        .foregroundColor(Color(hex: "B03030"))
                                     Spacer()
                                     Image(systemName: "trash")
-                                        .foregroundColor(.white)
+                                        .foregroundColor(Color(hex: "B03030"))
                                 }
                             }
                         }
                     }
-                    
+
                     // 關於
-                    settingsSection(title: "關於") {
-                        VStack(spacing: 12) {
-                            HStack {
-                                Text("版本")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Text("1.0.0")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.white.opacity(0.8))
-                            }
+                    settingsSection(title: "🌿 關於") {
+                        settingsRow {
+                            Text("版本")
+                                .font(GhibliTheme.Typography.body(16))
+                                .foregroundColor(Color.ghibliDeepForest)
+                            Spacer()
+                            Text("1.0.0")
+                                .font(GhibliTheme.Typography.body(14))
+                                .foregroundColor(Color.ghibleBarkBrown.opacity(0.7))
                         }
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 18)
                 .padding(.bottom, 100)
             }
         }
@@ -195,51 +180,52 @@ struct SettingsView: View {
             Text("確定要重置所有設置嗎？")
         }
     }
-    
+
     // MARK: - Header
     private var headerView: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text("設定")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                
-                Text("Customize your experience!")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(GhibliTheme.Typography.title(26))
+                    .foregroundColor(Color.ghibliDeepForest)
+                Text("個人化你的小屋")
+                    .font(GhibliTheme.Typography.body(13))
+                    .foregroundColor(Color.ghibleBarkBrown.opacity(0.75))
             }
-            
             Spacer()
-            
-            // 兔子 mascot
-            BunnyView(isAnimating: false)
-                .frame(width: 60, height: 60)
+            AnimatedCharacterView(animator: headerAnimator, size: 56)
+                .onAppear { headerAnimator.startAnimation(state: .idle) }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 6)
         .padding(.top, 16)
-        .padding(.bottom, 20)
+        .padding(.bottom, 8)
     }
-    
+
     // MARK: - Settings Section
     private func settingsSection<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(.white)
-            
-            VStack(spacing: 0) {
-                content()
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.ultraThinMaterial)
-            )
+                .font(GhibliTheme.Typography.heading(16))
+                .foregroundColor(Color.ghibliDeepForest)
+                .padding(.leading, 4)
+
+            VStack(spacing: 0) { content() }
+                .ghibliCard(padding: EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16),
+                            cornerRadius: GhibliTheme.Radius.md)
         }
+    }
+
+    @ViewBuilder
+    private func settingsRow<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        HStack { content() }
+    }
+
+    private var ghibliDivider: some View {
+        Divider()
+            .background(Color.ghibliWarmEarth.opacity(0.15))
     }
 }
 
-// MARK: - Preview
 #Preview {
     SettingsView()
         .environmentObject(AlarmManager())

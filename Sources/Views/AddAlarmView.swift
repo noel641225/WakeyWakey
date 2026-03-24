@@ -6,7 +6,7 @@ struct AddAlarmView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var alarmManager: AlarmManager
     @EnvironmentObject var settingsManager: SettingsManager
-    
+
     @State private var alarmTime = Date()
     @State private var alarmLabel = "起床啦！"
     @State private var selectedRepeatDays: Set<Weekday> = []
@@ -14,223 +14,195 @@ struct AddAlarmView: View {
     @State private var snoozeTaps: Int = 1
     @State private var dismissTaps: Int = 3
     @State private var moveSpeed: Double = 0.5
-    
+
     var body: some View {
         NavigationView {
             ZStack {
-                // 背景
-                LinearGradient(
-                    gradient: Gradient(colors: [Color(hex: "FFB6C1"), Color(hex: "E6E6FA")]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
+                // Warm parchment background
+                Color.ghibliCream.ignoresSafeArea()
+
                 ScrollView {
-                    VStack(spacing: 24) {
-                        // 時間選擇
+                    VStack(spacing: 20) {
                         timeSection
-                        
-                        // 重複設定
                         repeatSection
-                        
-                        // 標籤
                         labelSection
-                        
-                        // 圖片選擇
                         imageSection
-                        
-                        // 進階設定
                         advancedSection
                     }
-                    .padding(20)
+                    .padding(18)
                 }
             }
             .navigationTitle("新增鬧鐘")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") {
-                        dismiss()
-                    }
-                    .foregroundColor(.gray)
+                    Button("取消") { dismiss() }
+                        .font(GhibliTheme.Typography.body(16))
+                        .foregroundColor(Color.ghibleBarkBrown.opacity(0.7))
                 }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("儲存") {
-                        saveAlarm()
-                    }
-                    .fontWeight(.bold)
-                    .foregroundColor(Color(hex: "FF6B6B"))
+                    Button("儲存") { saveAlarm() }
+                        .font(GhibliTheme.Typography.heading(16))
+                        .foregroundColor(Color.ghibliForestGreen)
                 }
             }
+            .ghibliNavigation()
         }
     }
-    
+
     // MARK: - Time Section
     private var timeSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("⏰ 鬧鐘時間")
-                .font(.headline)
-                .foregroundColor(.white)
-            
+            sectionHeader("⏰ 鬧鐘時間")
+
             DatePicker("", selection: $alarmTime, displayedComponents: .hourAndMinute)
                 .datePickerStyle(.wheel)
                 .labelsHidden()
-                .colorInvert()
+                .tint(Color.ghibliForestGreen)
+                .frame(maxWidth: .infinity)
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-        )
+        .ghibliCard()
     }
-    
+
     // MARK: - Repeat Section
     private var repeatSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("🔄 重複")
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            HStack(spacing: 8) {
+            sectionHeader("🔄 重複")
+
+            HStack(spacing: 6) {
                 ForEach(Weekday.allCases) { day in
+                    let isSelected = selectedRepeatDays.contains(day)
                     Button(action: {
-                        if selectedRepeatDays.contains(day) {
-                            selectedRepeatDays.remove(day)
-                        } else {
-                            selectedRepeatDays.insert(day)
-                        }
+                        if isSelected { selectedRepeatDays.remove(day) }
+                        else { selectedRepeatDays.insert(day) }
                     }) {
                         Text(day.shortName)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(selectedRepeatDays.contains(day) ? .white : .gray)
-                            .frame(width: 40, height: 40)
+                            .font(GhibliTheme.Typography.body(13))
+                            .foregroundColor(isSelected ? .white : Color.ghibleBarkBrown.opacity(0.7))
+                            .frame(width: 38, height: 38)
                             .background(
-                                Circle()
-                                    .fill(selectedRepeatDays.contains(day) ? 
-                                        Color(hex: "FF6B6B") : Color(.systemGray5))
+                                Circle().fill(isSelected ? Color.ghibliForestGreen : Color.ghibliWarmEarth.opacity(0.12))
+                            )
+                            .overlay(
+                                Circle().stroke(isSelected ? Color.ghibliForestGreen : Color.ghibliWarmEarth.opacity(0.25), lineWidth: 1)
                             )
                     }
                 }
             }
-            
+
             if !selectedRepeatDays.isEmpty {
-                Button("取消全選") {
-                    selectedRepeatDays.removeAll()
-                }
-                .font(.system(size: 14))
-                .foregroundColor(.white.opacity(0.8))
+                Button("取消全選") { selectedRepeatDays.removeAll() }
+                    .font(GhibliTheme.Typography.caption(13))
+                    .foregroundColor(Color.ghibleBarkBrown.opacity(0.6))
             }
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-        )
+        .ghibliCard()
     }
-    
+
     // MARK: - Label Section
     private var labelSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("🏷️ 標籤")
-                .font(.headline)
-                .foregroundColor(.white)
-            
+            sectionHeader("🏷️ 標籤")
+
             TextField("起床啦！", text: $alarmLabel)
-                .textFieldStyle(.roundedBorder)
-                .padding(.horizontal, 4)
+                .font(GhibliTheme.Typography.body(16))
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
+                        .fill(Color.ghibliCream)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
+                                .stroke(Color.ghibliWarmEarth.opacity(0.3), lineWidth: 1)
+                        )
+                )
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-        )
+        .ghibliCard()
     }
-    
+
     // MARK: - Image Section
     private var imageSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("🖼️ 鬧鐘圖案")
-                .font(.headline)
-                .foregroundColor(.white)
-            
+            sectionHeader("🖼️ 鬧鐘圖案")
+
             ForEach(AlarmImageType.allCases) { type in
-                Button(action: {
-                    selectedImageType = type
-                }) {
+                let isSelected = selectedImageType == type
+                Button(action: { selectedImageType = type }) {
                     HStack {
                         Text(type.displayName)
-                            .foregroundColor(selectedImageType == type ? .white : .gray)
-                        
+                            .font(GhibliTheme.Typography.body(15))
+                            .foregroundColor(isSelected ? Color.ghibliDeepForest : Color.ghibleBarkBrown.opacity(0.7))
                         Spacer()
-                        
-                        if selectedImageType == type {
+                        if isSelected {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.white)
+                                .foregroundColor(Color.ghibliForestGreen)
                         }
                     }
-                    .padding()
+                    .padding(14)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(selectedImageType == type ? 
-                                Color(hex: "FF6B6B") : Color(.systemGray5))
+                        RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
+                            .fill(isSelected ? Color.ghibliForestGreen.opacity(0.1) : Color.ghibliCream)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
+                                    .stroke(isSelected ? Color.ghibliForestGreen.opacity(0.5) : Color.ghibliWarmEarth.opacity(0.2), lineWidth: 1)
+                            )
                     )
                 }
             }
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-        )
+        .ghibliCard()
     }
-    
+
     // MARK: - Advanced Section
     private var advancedSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("⚙️ 進階設定")
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            // 延長次數
+            sectionHeader("⚙️ 進階設定")
+
             HStack {
                 Text("延長所需點擊")
-                    .foregroundColor(.white)
+                    .font(GhibliTheme.Typography.body(15))
+                    .foregroundColor(Color.ghibliDeepForest)
                 Spacer()
                 Stepper("\(snoozeTaps) 次", value: $snoozeTaps, in: 1...10)
-                    .colorInvert()
+                    .tint(Color.ghibliForestGreen)
             }
-            
-            // 取消次數
+
+            Divider().background(Color.ghibliWarmEarth.opacity(0.2))
+
             HStack {
                 Text("取消所需點擊")
-                    .foregroundColor(.white)
+                    .font(GhibliTheme.Typography.body(15))
+                    .foregroundColor(Color.ghibliDeepForest)
                 Spacer()
                 Stepper("\(dismissTaps) 次", value: $dismissTaps, in: 1...10)
-                    .colorInvert()
+                    .tint(Color.ghibliForestGreen)
             }
-            
-            // 移動速度
-            VStack(alignment: .leading) {
+
+            Divider().background(Color.ghibliWarmEarth.opacity(0.2))
+
+            VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("圖案移動速度")
-                        .foregroundColor(.white)
+                        .font(GhibliTheme.Typography.body(15))
+                        .foregroundColor(Color.ghibliDeepForest)
                     Spacer()
                     Text(String(format: "%.0f%%", moveSpeed * 100))
-                        .foregroundColor(.white)
+                        .font(GhibliTheme.Typography.body(14))
+                        .foregroundColor(Color.ghibliWarmEarth)
                 }
                 Slider(value: $moveSpeed, in: 0.1...1.0)
-                    .tint(Color(hex: "FF6B6B"))
+                    .tint(Color.ghibliForestGreen)
             }
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-        )
+        .ghibliCard()
     }
-    
+
+    // MARK: - Section Header Helper
+    private func sectionHeader(_ text: String) -> some View {
+        Text(text)
+            .font(GhibliTheme.Typography.heading(16))
+            .foregroundColor(Color.ghibliDeepForest)
+    }
+
     // MARK: - Save
     private func saveAlarm() {
         let alarm = Alarm(
@@ -243,13 +215,11 @@ struct AddAlarmView: View {
             dismissCount: dismissTaps,
             moveSpeed: moveSpeed
         )
-        
         alarmManager.addAlarm(alarm)
         dismiss()
     }
 }
 
-// MARK: - Preview
 #Preview {
     AddAlarmView()
         .environmentObject(AlarmManager())

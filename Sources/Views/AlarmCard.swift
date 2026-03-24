@@ -5,63 +5,74 @@ struct AlarmCard: View {
     let alarm: Alarm
     @EnvironmentObject var alarmManager: AlarmManager
     @State private var isToggled: Bool
-    
+
     init(alarm: Alarm) {
         self.alarm = alarm
         self._isToggled = State(initialValue: alarm.isEnabled)
     }
-    
+
     var body: some View {
-        HStack {
-            // 鬧鐘時間
+        HStack(spacing: 16) {
+            // Time + label
             VStack(alignment: .leading, spacing: 4) {
                 Text(alarm.timeString)
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(isToggled ? .white : .gray)
-                
+                    .font(GhibliTheme.Typography.timeDisplay(38))
+                    .foregroundColor(isToggled ? Color.ghibliDeepForest : Color.ghibleBarkBrown.opacity(0.45))
+
                 Text(alarm.label)
-                    .font(.system(size: 14))
-                    .foregroundColor(isToggled ? .white.opacity(0.9) : .gray.opacity(0.8))
-                
-                Text(alarm.repeatString)
-                    .font(.system(size: 12))
-                    .foregroundColor(isToggled ? .white.opacity(0.7) : .gray.opacity(0.6))
+                    .font(GhibliTheme.Typography.body(13))
+                    .foregroundColor(isToggled ? Color.ghibleBarkBrown : Color.ghibleBarkBrown.opacity(0.4))
+
+                if !alarm.repeatString.isEmpty {
+                    Text(alarm.repeatString)
+                        .font(GhibliTheme.Typography.caption(11))
+                        .foregroundColor(isToggled ? Color.ghibliWarmEarth.opacity(0.8) : Color.ghibleBarkBrown.opacity(0.3))
+                }
             }
-            
+
             Spacer()
-            
-            // 切換開關
+
+            // Leaf toggle
             Toggle("", isOn: $isToggled)
                 .labelsHidden()
-                .tint(Color(hex: "FF6B6B"))
-                .onChange(of: isToggled) { newValue in
+                .toggleStyle(GhibliToggleStyle())
+                .onChange(of: isToggled) { _ in
                     alarmManager.toggleAlarm(alarm)
                 }
         }
-        .padding(20)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 18)
         .background(cardBackground)
-        .shadow(color: isToggled ? Color(hex: "FF6B6B").opacity(0.3) : .clear, radius: 8, x: 0, y: 4)
+        .ghibliShadow(isToggled ? GhibliTheme.Shadow.warm : GhibliTheme.Shadow.soft)
     }
-    
+
     @ViewBuilder
     private var cardBackground: some View {
         if isToggled {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(LinearGradient(
-                    gradient: Gradient(colors: [Color(hex: "FF6B6B"), Color(hex: "FF8E53")]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+            RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg, style: .continuous)
+                .fill(Color.ghibliParchment)
+                .overlay(
+                    RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg, style: .continuous)
+                        .stroke(Color.ghibliForestGreen.opacity(0.4), lineWidth: 1.5)
+                )
         } else {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(.systemGray6))
+            RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg, style: .continuous)
+                .fill(Color.ghibliParchment.opacity(0.55))
+                .overlay(
+                    RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg, style: .continuous)
+                        .stroke(Color.ghibleBarkBrown.opacity(0.15), lineWidth: 1)
+                )
         }
     }
 }
 
-// MARK: - Preview
 #Preview {
-    AlarmCard(alarm: Alarm(time: Date(), repeatDays: [.monday, .tuesday, .wednesday, .thursday, .friday], label: "起床啦！"))
-        .padding()
-        .environmentObject(AlarmManager())
+    AlarmCard(alarm: Alarm(
+        time: Date(),
+        repeatDays: [.monday, .tuesday, .wednesday, .thursday, .friday],
+        label: "起床啦！"
+    ))
+    .padding()
+    .background(Color.ghibliSoftSky.opacity(0.3))
+    .environmentObject(AlarmManager())
 }
