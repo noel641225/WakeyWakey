@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import UserNotifications
 import UIKit
+import AudioToolbox
 
 // MARK: - Alarm Manager
 class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {

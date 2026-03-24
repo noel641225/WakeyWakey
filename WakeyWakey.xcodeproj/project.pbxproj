@@ -8,33 +8,55 @@
 
 /* Begin PBXBuildFile section */
 		0BDC600E363076DEC50DFDA2 /* LobsterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CE294A01D471DCFE30935EB /* LobsterView.swift */; };
+		129D050A47FA36E303346F73 /* GhibliButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E514ACC971BA2394562C43B0 /* GhibliButtonStyle.swift */; };
 		2F60573F5559B2FC23D3E9E9 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12553D9C5D11476A6AACAA6A /* SettingsManager.swift */; };
+		34E953A7056DBFD87E7132EE /* GhibliCardModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0490678EC39D5B12599B6C88 /* GhibliCardModifier.swift */; };
 		358FD2CF7FD4CD22017F0580 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC4C11508E2441894004266E /* Assets.xcassets */; };
 		361471AD433ABD2E2E039A67 /* AlarmManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D6028202D5227E40DF40C7 /* AlarmManager.swift */; };
 		36C8AEF414CA97B5AB87C14F /* WakeyWakeyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A7456EC3A0F9C2B715D9C8 /* WakeyWakeyApp.swift */; };
 		4B969DE80FB9F12702025C18 /* AddAlarmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0535852D06DE3B44451FEF4 /* AddAlarmView.swift */; };
+		519801AB6BB48ED2E4D9B304 /* SpriteAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45CE7588E80DBCAA1290CAF /* SpriteAnimator.swift */; };
+		714B12FB06B4E2C97CD69E1C /* MeadowBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 784D6C1EBEDEFABBA64D5065 /* MeadowBackgroundView.swift */; };
+		7E7A524A5883D2C5E61C3243 /* SunriseBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6265EDA2D5949350F1D6CF /* SunriseBackgroundView.swift */; };
+		8BB7BCEF81592F7E6740B9C2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3016F6DBB35E57FDC9098765 /* SettingsView.swift */; };
 		911C9656E1D75FCC0499D208 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77F15E8FD4CE35193EF9093 /* AppSettings.swift */; };
+		A3F2911E4B4343214BA1A4A3 /* AlarmFiringView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E1EE5B919D10498619C21C /* AlarmFiringView.swift */; };
 		B31884F761626889948BB84D /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A6E37EAB0021491630F49C /* Alarm.swift */; };
 		BA9D504A34B681D13FC5E935 /* AlarmCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EA13F45A93ACA478E099324 /* AlarmCard.swift */; };
+		BADF1C971E84D75BBFD32326 /* GhibliNavigationStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0193E3971E389CB6898D1F24 /* GhibliNavigationStyle.swift */; };
+		C1A05D911B0AAAC374293CFC /* GhibliTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B38BFBB046A1A5A926311031 /* GhibliTheme.swift */; };
 		D05FE87B276B53CEEA831458 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6511C23FF43DE550A08696BD /* ContentView.swift */; };
 		D4DF56E1CBA186AA1A3729D2 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013876EA2AB73A1AF15AFA2E /* Color+Hex.swift */; };
+		E4851A4E3612D86432D99B69 /* GhibliToggleStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2790C665BBD6BA80E381B42C /* GhibliToggleStyle.swift */; };
+		F171C531D00E525A1B48A3EE /* AnimatedCharacterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A9ADFF077AEFD1720C7C7D3 /* AnimatedCharacterView.swift */; };
 		F5CAFF90579C869C140F9ACC /* BunnyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A98673865A64FAD46C9D720 /* BunnyView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		013876EA2AB73A1AF15AFA2E /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		0193E3971E389CB6898D1F24 /* GhibliNavigationStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhibliNavigationStyle.swift; sourceTree = "<group>"; };
+		0490678EC39D5B12599B6C88 /* GhibliCardModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhibliCardModifier.swift; sourceTree = "<group>"; };
 		12553D9C5D11476A6AACAA6A /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		21D6028202D5227E40DF40C7 /* AlarmManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmManager.swift; sourceTree = "<group>"; };
 		22A54044F37C4357AE4210DB /* WakeyWakey.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WakeyWakey.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2790C665BBD6BA80E381B42C /* GhibliToggleStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhibliToggleStyle.swift; sourceTree = "<group>"; };
 		2EA13F45A93ACA478E099324 /* AlarmCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmCard.swift; sourceTree = "<group>"; };
+		3016F6DBB35E57FDC9098765 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		40A7456EC3A0F9C2B715D9C8 /* WakeyWakeyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeyWakeyApp.swift; sourceTree = "<group>"; };
 		5A2EB4E33B8B3B30B4504C4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5CE294A01D471DCFE30935EB /* LobsterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobsterView.swift; sourceTree = "<group>"; };
+		5F6265EDA2D5949350F1D6CF /* SunriseBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SunriseBackgroundView.swift; sourceTree = "<group>"; };
 		6511C23FF43DE550A08696BD /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		6A9ADFF077AEFD1720C7C7D3 /* AnimatedCharacterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedCharacterView.swift; sourceTree = "<group>"; };
+		784D6C1EBEDEFABBA64D5065 /* MeadowBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeadowBackgroundView.swift; sourceTree = "<group>"; };
+		79E1EE5B919D10498619C21C /* AlarmFiringView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmFiringView.swift; sourceTree = "<group>"; };
 		9A98673865A64FAD46C9D720 /* BunnyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BunnyView.swift; sourceTree = "<group>"; };
 		B0535852D06DE3B44451FEF4 /* AddAlarmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAlarmView.swift; sourceTree = "<group>"; };
+		B38BFBB046A1A5A926311031 /* GhibliTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhibliTheme.swift; sourceTree = "<group>"; };
+		B45CE7588E80DBCAA1290CAF /* SpriteAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteAnimator.swift; sourceTree = "<group>"; };
 		D7A6E37EAB0021491630F49C /* Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
 		DC4C11508E2441894004266E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E514ACC971BA2394562C43B0 /* GhibliButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhibliButtonStyle.swift; sourceTree = "<group>"; };
 		E77F15E8FD4CE35193EF9093 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -43,7 +65,13 @@
 			isa = PBXGroup;
 			children = (
 				9A98673865A64FAD46C9D720 /* BunnyView.swift */,
+				E514ACC971BA2394562C43B0 /* GhibliButtonStyle.swift */,
+				0490678EC39D5B12599B6C88 /* GhibliCardModifier.swift */,
+				0193E3971E389CB6898D1F24 /* GhibliNavigationStyle.swift */,
+				2790C665BBD6BA80E381B42C /* GhibliToggleStyle.swift */,
 				5CE294A01D471DCFE30935EB /* LobsterView.swift */,
+				784D6C1EBEDEFABBA64D5065 /* MeadowBackgroundView.swift */,
+				5F6265EDA2D5949350F1D6CF /* SunriseBackgroundView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -53,7 +81,9 @@
 			children = (
 				B0535852D06DE3B44451FEF4 /* AddAlarmView.swift */,
 				2EA13F45A93ACA478E099324 /* AlarmCard.swift */,
+				79E1EE5B919D10498619C21C /* AlarmFiringView.swift */,
 				6511C23FF43DE550A08696BD /* ContentView.swift */,
+				3016F6DBB35E57FDC9098765 /* SettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -78,15 +108,26 @@
 		8D65C1774E621BEE9A727E1E /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				9116D499738513E94F624A4F /* Animation */,
 				F1BABC8AC15015EBAE847F91 /* App */,
 				0146EEFF9E937302649A70BD /* Components */,
 				EDB94E7253CA86258E2DA1AA /* Extensions */,
 				3192EE861ABD48FAF11DC6C6 /* Managers */,
 				AD96D81790DF9A96E4920F28 /* Models */,
 				CA84EA4D06BDDC30D281581C /* Resources */,
+				C85CDD2C3B421AC74B30A896 /* Theme */,
 				082483D42CD512496EF8B0C6 /* Views */,
 			);
 			path = Sources;
+			sourceTree = "<group>";
+		};
+		9116D499738513E94F624A4F /* Animation */ = {
+			isa = PBXGroup;
+			children = (
+				6A9ADFF077AEFD1720C7C7D3 /* AnimatedCharacterView.swift */,
+				B45CE7588E80DBCAA1290CAF /* SpriteAnimator.swift */,
+			);
+			path = Animation;
 			sourceTree = "<group>";
 		};
 		AD96D81790DF9A96E4920F28 /* Models */ = {
@@ -96,6 +137,14 @@
 				E77F15E8FD4CE35193EF9093 /* AppSettings.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		C85CDD2C3B421AC74B30A896 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				B38BFBB046A1A5A926311031 /* GhibliTheme.swift */,
+			);
+			path = Theme;
 			sourceTree = "<group>";
 		};
 		CA84EA4D06BDDC30D281581C /* Resources */ = {
@@ -205,13 +254,24 @@
 				4B969DE80FB9F12702025C18 /* AddAlarmView.swift in Sources */,
 				B31884F761626889948BB84D /* Alarm.swift in Sources */,
 				BA9D504A34B681D13FC5E935 /* AlarmCard.swift in Sources */,
+				A3F2911E4B4343214BA1A4A3 /* AlarmFiringView.swift in Sources */,
 				361471AD433ABD2E2E039A67 /* AlarmManager.swift in Sources */,
+				F171C531D00E525A1B48A3EE /* AnimatedCharacterView.swift in Sources */,
 				911C9656E1D75FCC0499D208 /* AppSettings.swift in Sources */,
 				F5CAFF90579C869C140F9ACC /* BunnyView.swift in Sources */,
 				D4DF56E1CBA186AA1A3729D2 /* Color+Hex.swift in Sources */,
 				D05FE87B276B53CEEA831458 /* ContentView.swift in Sources */,
+				129D050A47FA36E303346F73 /* GhibliButtonStyle.swift in Sources */,
+				34E953A7056DBFD87E7132EE /* GhibliCardModifier.swift in Sources */,
+				BADF1C971E84D75BBFD32326 /* GhibliNavigationStyle.swift in Sources */,
+				C1A05D911B0AAAC374293CFC /* GhibliTheme.swift in Sources */,
+				E4851A4E3612D86432D99B69 /* GhibliToggleStyle.swift in Sources */,
 				0BDC600E363076DEC50DFDA2 /* LobsterView.swift in Sources */,
+				714B12FB06B4E2C97CD69E1C /* MeadowBackgroundView.swift in Sources */,
 				2F60573F5559B2FC23D3E9E9 /* SettingsManager.swift in Sources */,
+				8BB7BCEF81592F7E6740B9C2 /* SettingsView.swift in Sources */,
+				519801AB6BB48ED2E4D9B304 /* SpriteAnimator.swift in Sources */,
+				7E7A524A5883D2C5E61C3243 /* SunriseBackgroundView.swift in Sources */,
 				36C8AEF414CA97B5AB87C14F /* WakeyWakeyApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
