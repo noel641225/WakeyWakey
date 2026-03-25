@@ -50,12 +50,36 @@ struct ContentView: View {
         ZStack {
             MeadowBackgroundView()
 
+            // Decorative soot sprites floating in corners
+            decorativeCharacters
+
             VStack(spacing: 0) {
                 headerView
                 alarmListView
                 Spacer().frame(height: 80)
             }
         }
+    }
+
+    // MARK: - Decorative Characters
+    private var decorativeCharacters: some View {
+        GeometryReader { geo in
+            // Soot sprite - bottom left corner
+            SootSpriteView(size: 22)
+                .position(x: 28, y: geo.size.height - 110)
+                .opacity(0.7)
+
+            // Soot sprite - bottom right area
+            SootSpriteView(size: 18)
+                .position(x: geo.size.width - 30, y: geo.size.height - 140)
+                .opacity(0.6)
+
+            // Kinoko mushroom - lower left
+            KinokoView(size: 32)
+                .position(x: 22, y: geo.size.height - 160)
+                .opacity(0.75)
+        }
+        .allowsHitTesting(false)
     }
 
     // MARK: - Header

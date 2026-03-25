@@ -1,177 +1,161 @@
 import SwiftUI
 
-// MARK: - Bunny View (可愛小兔子)
+// MARK: - Bunny View (Ghibli Style)
 struct BunnyView: View {
     var isAnimating: Bool = false
-    
-    @State private var isHopping = false
+    var size: CGFloat = 80
+
+    @State private var breathScale: CGFloat = 1.0
     @State private var isHeadTilted = false
     @State private var eyeBlink = false
-    
+
     var body: some View {
         ZStack {
-            // 陰影
+            // Shadow
             Ellipse()
-                .fill(Color.black.opacity(0.1))
-                .frame(width: 50, height: 10)
-                .offset(y: 35)
-                .scaleEffect(isHopping ? 0.8 : 1)
-                .animation(.easeInOut(duration: 0.3), value: isHopping)
-            
-            // 身體
+                .fill(Color.ghibleBarkBrown.opacity(0.12))
+                .frame(width: size * 0.65, height: size * 0.12)
+                .offset(y: size * 0.44)
+                .blur(radius: 3)
+                .scaleEffect(x: breathScale * 0.97, y: 1)
+
+            // Body
             Ellipse()
-                .fill(Color.white)
-                .frame(width: 50, height: 45)
-                .offset(y: isHopping ? -5 : 0)
-                .animation(.easeInOut(duration: 0.3), value: isHopping)
-            
-            // 肚子
-            Ellipse()
-                .fill(Color(hex: "FFF0F5"))
-                .frame(width: 30, height: 25)
-                .offset(y: 5)
-            
-            // 頭部
-            Circle()
-                .fill(Color.white)
-                .frame(width: 40, height: 40)
-                .offset(y: -25)
-                .rotationEffect(.degrees(isHeadTilted ? 15 : 0))
-                .animation(.easeInOut(duration: 0.5), value: isHeadTilted)
-            
-            // 左耳朵
-            Ellipse()
-                .fill(Color.white)
-                .frame(width: 12, height: 35)
-                .offset(x: -10, y: -50)
-                .rotationEffect(.degrees(isHeadTilted ? -10 : 0))
-                .animation(.easeInOut(duration: 0.5), value: isHeadTilted)
-            
-            // 左耳朵內部
-            Ellipse()
-                .fill(Color(hex: "FFB6C1"))
-                .frame(width: 6, height: 25)
-                .offset(x: -10, y: -48)
-            
-            // 右耳朵
-            Ellipse()
-                .fill(Color.white)
-                .frame(width: 12, height: 35)
-                .offset(x: 10, y: -50)
-                .rotationEffect(.degrees(isHeadTilted ? 10 : 0))
-                .animation(.easeInOut(duration: 0.5), value: isHeadTilted)
-            
-            // 右耳朵內部
-            Ellipse()
-                .fill(Color(hex: "FFB6C1"))
-                .frame(width: 6, height: 25)
-                .offset(x: 10, y: -48)
-            
-            // 眼睛
-            HStack(spacing: 12) {
-                Circle()
-                    .fill(.black)
-                    .frame(width: 6, height: 6)
-                    .overlay(
-                        Circle()
-                            .fill(.white)
-                            .frame(width: 2, height: 2)
-                            .offset(x: -1, y: -1)
+                .fill(
+                    LinearGradient(
+                        colors: [Color.ghibliCream, Color(hex: "F0E8D0")],
+                        startPoint: .top,
+                        endPoint: .bottom
                     )
-                
-                Circle()
-                    .fill(.black)
-                    .frame(width: 6, height: 6)
-                    .overlay(
-                        Circle()
-                            .fill(.white)
-                            .frame(width: 2, height: 2)
-                            .offset(x: -1, y: -1)
-                    )
-            }
-            .offset(y: -28)
-            .scaleEffect(eyeBlink ? 0.1 : 1)
-            .animation(.easeInOut(duration: 0.1), value: eyeBlink)
-            
-            // 鼻子
+                )
+                .frame(width: size * 0.62, height: size * 0.55)
+                .offset(y: size * 0.1)
+
+            // Belly
             Ellipse()
-                .fill(Color(hex: "FFB6C1"))
-                .frame(width: 6, height: 4)
-                .offset(y: -22)
-            
-            // 嘴巴
-            VStack(spacing: 0) {
-                Path { path in
-                    path.move(to: CGPoint(x: 0, y: 0))
-                    path.addQuadCurve(to: CGPoint(x: 4, y: 3), control: CGPoint(x: 4, y: 0))
-                }
-                .stroke(Color(hex: "FFB6C1"), lineWidth: 1)
-                
-                Path { path in
-                    path.move(to: CGPoint(x: 0, y: 0))
-                    path.addQuadCurve(to: CGPoint(x: -4, y: 3), control: CGPoint(x: -4, y: 0))
-                }
-                .stroke(Color(hex: "FFB6C1"), lineWidth: 1)
-            }
-            .offset(y: -18)
-            
-            // 腮紅
-            HStack(spacing: 20) {
-                Circle()
-                    .fill(Color(hex: "FFB6C1").opacity(0.5))
-                    .frame(width: 8, height: 5)
-                
-                Circle()
-                    .fill(Color(hex: "FFB6C1").opacity(0.5))
-                    .frame(width: 8, height: 5)
-            }
-            .offset(y: -20)
-            
-            // 尾巴
+                .fill(Color(hex: "FFF0E0"))
+                .frame(width: size * 0.36, height: size * 0.32)
+                .offset(y: size * 0.18)
+
+            // Left ear
+            Ellipse()
+                .fill(Color.ghibliCream)
+                .frame(width: size * 0.15, height: size * 0.42)
+                .offset(x: -size * 0.14, y: -size * 0.35)
+                .rotationEffect(.degrees(isHeadTilted ? -8 : 0))
+                .animation(.easeInOut(duration: 0.6), value: isHeadTilted)
+
+            // Left ear inner
+            Ellipse()
+                .fill(Color.ghibliSakuraPink.opacity(0.7))
+                .frame(width: size * 0.07, height: size * 0.28)
+                .offset(x: -size * 0.14, y: -size * 0.33)
+                .rotationEffect(.degrees(isHeadTilted ? -8 : 0))
+                .animation(.easeInOut(duration: 0.6), value: isHeadTilted)
+
+            // Right ear
+            Ellipse()
+                .fill(Color.ghibliCream)
+                .frame(width: size * 0.15, height: size * 0.42)
+                .offset(x: size * 0.14, y: -size * 0.35)
+                .rotationEffect(.degrees(isHeadTilted ? 8 : 0))
+                .animation(.easeInOut(duration: 0.6), value: isHeadTilted)
+
+            // Right ear inner
+            Ellipse()
+                .fill(Color.ghibliSakuraPink.opacity(0.7))
+                .frame(width: size * 0.07, height: size * 0.28)
+                .offset(x: size * 0.14, y: -size * 0.33)
+                .rotationEffect(.degrees(isHeadTilted ? 8 : 0))
+                .animation(.easeInOut(duration: 0.6), value: isHeadTilted)
+
+            // Head
             Circle()
-                .fill(Color.white)
-                .frame(width: 12, height: 12)
-                .offset(x: -30, y: 10)
-                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 0)
-            
-            // 腳腳
-            HStack(spacing: 15) {
-                Ellipse()
-                    .fill(Color.white)
-                    .frame(width: 15, height: 10)
-                
-                Ellipse()
-                    .fill(Color.white)
-                    .frame(width: 15, height: 10)
+                .fill(Color.ghibliCream)
+                .frame(width: size * 0.5, height: size * 0.5)
+                .offset(y: -size * 0.18)
+                .rotationEffect(.degrees(isHeadTilted ? 12 : 0))
+                .animation(.easeInOut(duration: 0.6), value: isHeadTilted)
+
+            // Eyes
+            HStack(spacing: size * 0.13) {
+                eyeView
+                eyeView
             }
-            .offset(y: 25)
+            .offset(y: -size * 0.24)
+            .scaleEffect(eyeBlink ? CGSize(width: 1.0, height: 0.08) : CGSize(width: 1, height: 1))
+            .animation(.easeInOut(duration: 0.08), value: eyeBlink)
+
+            // Nose
+            Ellipse()
+                .fill(Color.ghibliSakuraPink)
+                .frame(width: size * 0.08, height: size * 0.05)
+                .offset(y: -size * 0.16)
+
+            // Cheeks
+            HStack(spacing: size * 0.22) {
+                Ellipse()
+                    .fill(Color.ghibliSakuraPink.opacity(0.35))
+                    .frame(width: size * 0.1, height: size * 0.06)
+                Ellipse()
+                    .fill(Color.ghibliSakuraPink.opacity(0.35))
+                    .frame(width: size * 0.1, height: size * 0.06)
+            }
+            .offset(y: -size * 0.19)
+
+            // Tail
+            Circle()
+                .fill(Color.ghibliCream)
+                .frame(width: size * 0.16, height: size * 0.16)
+                .offset(x: -size * 0.36, y: size * 0.08)
+                .shadow(color: Color.ghibleBarkBrown.opacity(0.08), radius: 2)
+
+            // Feet
+            HStack(spacing: size * 0.18) {
+                Ellipse()
+                    .fill(Color.ghibliCream)
+                    .frame(width: size * 0.2, height: size * 0.12)
+                Ellipse()
+                    .fill(Color.ghibliCream)
+                    .frame(width: size * 0.2, height: size * 0.12)
+            }
+            .offset(y: size * 0.36)
         }
+        .scaleEffect(breathScale)
+        .frame(width: size, height: size)
         .onAppear {
-            if isAnimating {
-                startAnimating()
-            }
+            if isAnimating { startAnimations() }
         }
     }
-    
-    private func startAnimating() {
-        // 開始跳躍動畫
-        Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true) { _ in
-            isHopping = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                isHopping = false
+
+    private var eyeView: some View {
+        Circle()
+            .fill(Color.ghibleBarkBrown)
+            .frame(width: size * 0.09, height: size * 0.09)
+            .overlay(
+                Circle()
+                    .fill(.white)
+                    .frame(width: size * 0.03, height: size * 0.03)
+                    .offset(x: -size * 0.01, y: -size * 0.01)
+            )
+    }
+
+    private func startAnimations() {
+        // Breathing animation
+        withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+            breathScale = 1.03
+        }
+
+        // Head tilt
+        Timer.scheduledTimer(withTimeInterval: 2.8, repeats: true) { _ in
+            withAnimation { isHeadTilted = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation { isHeadTilted = false }
             }
         }
-        
-        // 開始歪頭動畫
-        Timer.scheduledTimer(withTimeInterval: 2.5, repeats: true) { _ in
-            isHeadTilted = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                isHeadTilted = false
-            }
-        }
-        
-        // 開始眨眼動畫
-        Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { _ in
+
+        // Blink
+        Timer.scheduledTimer(withTimeInterval: 3.5, repeats: true) { _ in
             eyeBlink = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                 eyeBlink = false
@@ -182,7 +166,7 @@ struct BunnyView: View {
 
 // MARK: - Preview
 #Preview {
-    BunnyView(isAnimating: true)
-        .frame(width: 150, height: 150)
-        .padding()
+    BunnyView(isAnimating: true, size: 120)
+        .padding(40)
+        .background(Color.ghibliSoftSky.opacity(0.3))
 }

@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - Ringtone Picker View
 struct RingtonePickerView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject var ringtoneManager: RingtoneManager
 
     @Binding var selectedRingtone: RingtoneSelection
@@ -14,18 +15,26 @@ struct RingtonePickerView: View {
     @State private var showError            = false
     @State private var isImporting          = false
 
+    private var bgColor: Color {
+        colorScheme == .dark ? Color.ghibliDarkBackground : Color.ghibliCream
+    }
+    private var cardColor: Color {
+        colorScheme == .dark ? Color.ghibliDarkCard : Color.ghibliParchment
+    }
+    private var accentColor: Color {
+        colorScheme == .dark ? Color.ghibliDarkPrimary : Color.ghibliForestGreen
+    }
+    private var textColor: Color {
+        colorScheme == .dark ? Color.ghibliDarkText : Color.ghibliDeepForest
+    }
+
     var body: some View {
         NavigationView {
             ZStack {
-                LinearGradient(
-                    gradient: Gradient(colors: [Color(hex: "FFB6C1"), Color(hex: "E6E6FA")]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                bgColor.ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: 24) {
+                    VStack(spacing: 20) {
                         presetSection
                         customSection
                     }
@@ -44,7 +53,7 @@ struct RingtonePickerView: View {
                         ringtoneManager.stopPlayback()
                         dismiss()
                     }
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.ghibleBarkBrown.opacity(0.7))
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("確定") {
@@ -52,7 +61,7 @@ struct RingtonePickerView: View {
                         dismiss()
                     }
                     .fontWeight(.bold)
-                    .foregroundColor(Color(hex: "FF6B6B"))
+                    .foregroundColor(accentColor)
                 }
             }
             .fileImporter(
@@ -81,16 +90,29 @@ struct RingtonePickerView: View {
     // MARK: - Preset Section
     private var presetSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("🔔 內建鈴聲")
-                .font(.headline)
-                .foregroundColor(.white)
+            HStack(spacing: 8) {
+                Image(systemName: "bell.fill")
+                    .foregroundColor(accentColor)
+                Text("內建鈴聲")
+                    .font(GhibliTheme.Typography.heading(16))
+                    .foregroundColor(textColor)
+            }
+            .padding(.bottom, 2)
 
             ForEach(PresetRingtone.allCases) { preset in
                 presetRow(preset)
             }
         }
         .padding(20)
-        .background(RoundedRectangle(cornerRadius: 20).fill(.ultraThinMaterial))
+        .background(
+            RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg)
+                .fill(cardColor)
+                .shadow(color: Color.ghibleBarkBrown.opacity(0.1), radius: 8, x: 0, y: 3)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg)
+                .stroke(Color.ghibliWarmEarth.opacity(0.2), lineWidth: 1)
+        )
     }
 
     private func presetRow(_ preset: PresetRingtone) -> some View {
@@ -102,36 +124,35 @@ struct RingtonePickerView: View {
             ringtoneManager.playPreset(preset)
         }) {
             HStack(spacing: 14) {
-                // Play indicator
                 if ringtoneManager.isPlaying && isSelected {
                     Image(systemName: "waveform")
                         .font(.system(size: 16))
-                        .foregroundColor(Color(hex: "FF6B6B"))
-                        .opacity(ringtoneManager.isPlaying ? 1 : 0.5)
+                        .foregroundColor(accentColor)
                 } else {
                     Image(systemName: "play.circle")
                         .font(.system(size: 16))
-                        .foregroundColor(isSelected ? Color(hex: "FF6B6B") : .gray)
+                        .foregroundColor(isSelected ? accentColor : Color.ghibleBarkBrown.opacity(0.5))
                 }
 
                 Text(preset.displayName)
-                    .foregroundColor(isSelected ? .white : Color(.label))
+                    .font(GhibliTheme.Typography.body(15))
+                    .foregroundColor(isSelected ? accentColor : textColor)
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(Color(hex: "FF6B6B"))
+                        .foregroundColor(accentColor)
                 }
             }
-            .padding(14)
+            .padding(12)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color(hex: "FF6B6B").opacity(0.2) : Color(.systemGray6))
+                RoundedRectangle(cornerRadius: GhibliTheme.Radius.sm)
+                    .fill(isSelected ? accentColor.opacity(0.12) : Color.clear)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color(hex: "FF6B6B") : Color.clear, lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: GhibliTheme.Radius.sm)
+                    .stroke(isSelected ? accentColor.opacity(0.4) : Color.ghibliWarmEarth.opacity(0.1), lineWidth: 1.2)
             )
         }
     }
@@ -139,34 +160,46 @@ struct RingtonePickerView: View {
     // MARK: - Custom Section
     private var customSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("🎵 自訂鈴聲")
-                .font(.headline)
-                .foregroundColor(.white)
+            HStack(spacing: 8) {
+                Image(systemName: "music.note")
+                    .foregroundColor(accentColor)
+                Text("自訂鈴聲")
+                    .font(GhibliTheme.Typography.heading(16))
+                    .foregroundColor(textColor)
+            }
+            .padding(.bottom, 2)
 
-            // Import button
             Button(action: { showingFilePicker = true }) {
                 HStack {
                     Image(systemName: "square.and.arrow.down.fill")
                     Text("匯入音樂檔案")
+                        .font(GhibliTheme.Typography.body(15))
                         .fontWeight(.semibold)
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(hex: "FF6B6B"))
+                    RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
+                        .fill(
+                            LinearGradient(
+                                colors: [accentColor, Color.ghibliDeepForest],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .shadow(color: accentColor.opacity(0.35), radius: 6, x: 0, y: 3)
                 )
             }
 
             Text("支援 MP3、WAV、M4A、AAC 格式，最長 30 秒")
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
+                .font(GhibliTheme.Typography.caption(12))
+                .foregroundColor(Color.ghibleBarkBrown.opacity(0.6))
 
             if ringtoneManager.customRingtones.isEmpty {
                 Text("尚無自訂鈴聲")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.6))
+                    .font(GhibliTheme.Typography.body(14))
+                    .foregroundColor(Color.ghibleBarkBrown.opacity(0.5))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
             } else {
@@ -176,7 +209,15 @@ struct RingtonePickerView: View {
             }
         }
         .padding(20)
-        .background(RoundedRectangle(cornerRadius: 20).fill(.ultraThinMaterial))
+        .background(
+            RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg)
+                .fill(cardColor)
+                .shadow(color: Color.ghibleBarkBrown.opacity(0.1), radius: 8, x: 0, y: 3)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg)
+                .stroke(Color.ghibliWarmEarth.opacity(0.2), lineWidth: 1)
+        )
     }
 
     private func customRingtoneRow(_ ringtone: RingtoneSelection) -> some View {
@@ -193,28 +234,27 @@ struct RingtonePickerView: View {
                     if ringtoneManager.isPlaying && isSelected {
                         Image(systemName: "waveform")
                             .font(.system(size: 16))
-                            .foregroundColor(Color(hex: "FF6B6B"))
-                            .opacity(ringtoneManager.isPlaying ? 1 : 0.5)
+                            .foregroundColor(accentColor)
                     } else {
                         Image(systemName: "play.circle")
                             .font(.system(size: 16))
-                            .foregroundColor(isSelected ? Color(hex: "FF6B6B") : .gray)
+                            .foregroundColor(isSelected ? accentColor : Color.ghibleBarkBrown.opacity(0.5))
                     }
 
                     Text(ringtone.displayName)
-                        .foregroundColor(isSelected ? .white : Color(.label))
+                        .font(GhibliTheme.Typography.body(15))
+                        .foregroundColor(isSelected ? accentColor : textColor)
                         .lineLimit(1)
 
                     Spacer()
 
                     if isSelected {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(Color(hex: "FF6B6B"))
+                            .foregroundColor(accentColor)
                     }
                 }
             }
 
-            // Delete button
             Button(action: {
                 if selectedRingtone == ringtone {
                     selectedRingtone = .default
@@ -224,34 +264,39 @@ struct RingtonePickerView: View {
             }) {
                 Image(systemName: "trash.circle")
                     .font(.system(size: 20))
-                    .foregroundColor(.red.opacity(0.7))
+                    .foregroundColor(Color.ghibliSunsetGlow.opacity(0.8))
             }
         }
-        .padding(14)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(isSelected ? Color(hex: "FF6B6B").opacity(0.2) : Color(.systemGray6))
+            RoundedRectangle(cornerRadius: GhibliTheme.Radius.sm)
+                .fill(isSelected ? accentColor.opacity(0.12) : Color.clear)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected ? Color(hex: "FF6B6B") : Color.clear, lineWidth: 1.5)
+            RoundedRectangle(cornerRadius: GhibliTheme.Radius.sm)
+                .stroke(isSelected ? accentColor.opacity(0.4) : Color.ghibliWarmEarth.opacity(0.1), lineWidth: 1.2)
         )
     }
 
     // MARK: - Importing Overlay
     private var importingOverlay: some View {
         ZStack {
-            Color.black.opacity(0.5).ignoresSafeArea()
+            Color.ghibliDeepForest.opacity(0.4).ignoresSafeArea()
             VStack(spacing: 16) {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color.ghibliForestGreen))
                     .scaleEffect(1.5)
                 Text("正在讀取音訊...")
-                    .foregroundColor(.white)
+                    .font(GhibliTheme.Typography.body(15))
+                    .foregroundColor(Color.ghibliDeepForest)
                     .fontWeight(.semibold)
             }
             .padding(40)
-            .background(RoundedRectangle(cornerRadius: 20).fill(.ultraThinMaterial))
+            .background(
+                RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg)
+                    .fill(Color.ghibliCream)
+                    .shadow(color: Color.ghibleBarkBrown.opacity(0.2), radius: 16, x: 0, y: 6)
+            )
         }
     }
 
