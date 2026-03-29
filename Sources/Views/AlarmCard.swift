@@ -4,6 +4,7 @@ import SwiftUI
 struct AlarmCard: View {
     let alarm: Alarm
     @EnvironmentObject var alarmManager: AlarmManager
+    @Environment(\.colorScheme) var colorScheme
     @State private var isToggled: Bool
 
     init(alarm: Alarm) {
@@ -17,16 +18,16 @@ struct AlarmCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(alarm.timeString)
                     .font(GhibliTheme.Typography.timeDisplay(38))
-                    .foregroundColor(isToggled ? Color.ghibliDeepForest : Color.ghibleBarkBrown.opacity(0.45))
+                    .foregroundColor(isToggled ? (colorScheme == .dark ? Color.ghibliDarkText : Color.ghibliDeepForest) : (colorScheme == .dark ? Color.ghibliDarkText.opacity(0.35) : Color.ghibleBarkBrown.opacity(0.45)))
 
                 Text(alarm.label)
                     .font(GhibliTheme.Typography.body(13))
-                    .foregroundColor(isToggled ? Color.ghibleBarkBrown : Color.ghibleBarkBrown.opacity(0.4))
+                    .foregroundColor(isToggled ? (colorScheme == .dark ? Color.ghibliDarkText.opacity(0.85) : Color.ghibleBarkBrown) : (colorScheme == .dark ? Color.ghibliDarkText.opacity(0.3) : Color.ghibleBarkBrown.opacity(0.4)))
 
                 if !alarm.repeatString.isEmpty {
                     Text(alarm.repeatString)
                         .font(GhibliTheme.Typography.caption(11))
-                        .foregroundColor(isToggled ? Color.ghibliWarmEarth.opacity(0.8) : Color.ghibleBarkBrown.opacity(0.3))
+                        .foregroundColor(isToggled ? (colorScheme == .dark ? Color.ghibliDarkPrimary.opacity(0.8) : Color.ghibliWarmEarth.opacity(0.8)) : (colorScheme == .dark ? Color.ghibliDarkText.opacity(0.25) : Color.ghibleBarkBrown.opacity(0.3)))
                 }
             }
 
@@ -50,14 +51,14 @@ struct AlarmCard: View {
     private var cardBackground: some View {
         if isToggled {
             RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg, style: .continuous)
-                .fill(Color.ghibliParchment)
+                .fill(colorScheme == .dark ? Color.ghibliDarkCard : Color.ghibliParchment)
                 .overlay(
                     RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg, style: .continuous)
-                        .stroke(Color.ghibliForestGreen.opacity(0.4), lineWidth: 1.5)
+                        .stroke((colorScheme == .dark ? Color.ghibliDarkPrimary : Color.ghibliForestGreen).opacity(0.4), lineWidth: 1.5)
                 )
         } else {
             RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg, style: .continuous)
-                .fill(Color.ghibliParchment.opacity(0.55))
+                .fill((colorScheme == .dark ? Color.ghibliDarkCard : Color.ghibliParchment).opacity(0.55))
                 .overlay(
                     RoundedRectangle(cornerRadius: GhibliTheme.Radius.lg, style: .continuous)
                         .stroke(Color.ghibleBarkBrown.opacity(0.15), lineWidth: 1)

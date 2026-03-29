@@ -4,6 +4,7 @@ struct ContentView: View {
     @EnvironmentObject var alarmManager: AlarmManager
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var ringtoneManager: RingtoneManager
+    @Environment(\.colorScheme) var colorScheme
     @State private var showingAddAlarm = false
     @State private var selectedTab = 0  // 0 = 鬧鐘, 1 = 設定
     @StateObject private var headerAnimator = SpriteAnimator(fps: 4)
@@ -88,11 +89,11 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Wakey Wakey")
                     .font(GhibliTheme.Typography.title(26))
-                    .foregroundColor(Color.ghibliDeepForest)
+                    .foregroundColor(colorScheme == .dark ? Color.ghibliDarkText : Color.ghibliDeepForest)
 
                 Text("一起床就要元氣滿滿！")
                     .font(GhibliTheme.Typography.body(13))
-                    .foregroundColor(Color.ghibleBarkBrown.opacity(0.9))
+                    .foregroundColor(colorScheme == .dark ? Color.ghibliDarkText.opacity(0.7) : Color.ghibleBarkBrown.opacity(0.9))
             }
 
             Spacer()
@@ -104,7 +105,7 @@ struct ContentView: View {
         .padding(.horizontal, 24)
         .padding(.top, 16)
         .padding(.bottom, 16)
-        .background(Color.ghibliCream.opacity(0.85))
+        .background((colorScheme == .dark ? Color.ghibliDarkCard : Color.ghibliCream).opacity(0.85))
     }
 
     // MARK: - Alarm List (with swipe-to-delete)
@@ -144,11 +145,11 @@ struct ContentView: View {
 
             Text("還沒有鬧鐘")
                 .font(GhibliTheme.Typography.heading(20))
-                .foregroundColor(Color.ghibliDeepForest)
+                .foregroundColor(colorScheme == .dark ? Color.ghibliDarkText : Color.ghibliDeepForest)
 
             Text("點擊下方 + 按鈕\n新增第一個鬧鐘吧～")
                 .font(GhibliTheme.Typography.body(15))
-                .foregroundColor(Color.ghibleBarkBrown.opacity(0.75))
+                .foregroundColor(colorScheme == .dark ? Color.ghibliDarkText.opacity(0.6) : Color.ghibleBarkBrown.opacity(0.75))
                 .multilineTextAlignment(.center)
         }
         .padding(.vertical, 50)
@@ -192,12 +193,12 @@ struct ContentView: View {
         .padding(.vertical, 18)
         .background(
             RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .fill(Color.ghibliCream.opacity(0.95))
+                .fill((colorScheme == .dark ? Color.ghibliDarkCard : Color.ghibliCream).opacity(0.95))
                 .overlay(
                     RoundedRectangle(cornerRadius: 30, style: .continuous)
                         .stroke(Color.ghibliWarmEarth.opacity(0.2), lineWidth: 1)
                 )
-                .shadow(color: Color.ghibleBarkBrown.opacity(0.12), radius: 12, x: 0, y: -4)
+                .shadow(color: colorScheme == .dark ? Color.black.opacity(0.3) : Color.ghibleBarkBrown.opacity(0.12), radius: 12, x: 0, y: -4)
         )
         .padding(.horizontal, 20)
     }
@@ -207,11 +208,11 @@ struct ContentView: View {
             VStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(isSelected ? Color.ghibliForestGreen : Color.ghibleBarkBrown.opacity(0.5))
+                    .foregroundColor(isSelected ? (colorScheme == .dark ? Color.ghibliDarkPrimary : Color.ghibliForestGreen) : (colorScheme == .dark ? Color.ghibliDarkText.opacity(0.4) : Color.ghibleBarkBrown.opacity(0.5)))
 
                 Text(label)
                     .font(GhibliTheme.Typography.caption(11))
-                    .foregroundColor(isSelected ? Color.ghibliForestGreen : Color.ghibleBarkBrown.opacity(0.5))
+                    .foregroundColor(isSelected ? (colorScheme == .dark ? Color.ghibliDarkPrimary : Color.ghibliForestGreen) : (colorScheme == .dark ? Color.ghibliDarkText.opacity(0.4) : Color.ghibleBarkBrown.opacity(0.5)))
             }
         }
     }

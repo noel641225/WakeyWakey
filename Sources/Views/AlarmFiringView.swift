@@ -7,6 +7,7 @@ import AudioToolbox
 struct AlarmFiringView: View {
     @EnvironmentObject var alarmManager: AlarmManager
     @EnvironmentObject var settingsManager: SettingsManager
+    @Environment(\.colorScheme) var colorScheme
     let alarm: Alarm
 
     // Chase-and-tap state

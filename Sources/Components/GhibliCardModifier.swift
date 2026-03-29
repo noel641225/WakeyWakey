@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - Ghibli Card View Modifier
 struct GhibliCardModifier: ViewModifier {
+    @Environment(\.colorScheme) var colorScheme
     var padding: EdgeInsets
     var cornerRadius: CGFloat
 
@@ -16,14 +17,14 @@ struct GhibliCardModifier: ViewModifier {
             .padding(padding)
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(Color.ghibliParchment)
+                    .fill(colorScheme == .dark ? Color.ghibliDarkCard : Color.ghibliParchment)
                     .overlay(
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                             .stroke(Color.ghibliWarmEarth.opacity(0.2), lineWidth: 1)
                     )
             )
             .shadow(
-                color: Color.ghibleBarkBrown.opacity(0.12),
+                color: colorScheme == .dark ? Color.black.opacity(0.25) : Color.ghibleBarkBrown.opacity(0.12),
                 radius: 12,
                 x: 0,
                 y: 4

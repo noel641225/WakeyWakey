@@ -4,6 +4,7 @@ import PhotosUI
 // MARK: - Add Alarm View
 struct AddAlarmView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var alarmManager: AlarmManager
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var ringtoneManager: RingtoneManager
@@ -21,7 +22,7 @@ struct AddAlarmView: View {
         NavigationView {
             ZStack {
                 // Warm parchment background
-                Color.ghibliCream.ignoresSafeArea()
+                (colorScheme == .dark ? Color.ghibliDarkBackground : Color.ghibliCream).ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 20) {
@@ -113,10 +114,11 @@ struct AddAlarmView: View {
 
             TextField("起床啦！", text: $alarmLabel)
                 .font(GhibliTheme.Typography.body(16))
+                .foregroundColor(colorScheme == .dark ? Color.ghibliDarkText : Color.ghibliDeepForest)
                 .padding(12)
                 .background(
                     RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
-                        .fill(Color.ghibliCream)
+                        .fill(colorScheme == .dark ? Color.ghibliDarkBackground : Color.ghibliCream)
                         .overlay(
                             RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
                                 .stroke(Color.ghibliWarmEarth.opacity(0.3), lineWidth: 1)
@@ -167,19 +169,19 @@ struct AddAlarmView: View {
             Button(action: { showRingtonePicker = true }) {
                 HStack {
                     Image(systemName: "music.note")
-                        .foregroundColor(Color.ghibliForestGreen)
+                        .foregroundColor(colorScheme == .dark ? Color.ghibliDarkPrimary : Color.ghibliForestGreen)
                     Text(selectedRingtone.displayName)
                         .font(GhibliTheme.Typography.body(15))
-                        .foregroundColor(Color.ghibliDeepForest)
+                        .foregroundColor(colorScheme == .dark ? Color.ghibliDarkText : Color.ghibliDeepForest)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(Color.ghibleBarkBrown.opacity(0.6))
+                        .foregroundColor(colorScheme == .dark ? Color.ghibliDarkText.opacity(0.5) : Color.ghibleBarkBrown.opacity(0.6))
                         .font(.system(size: 14))
                 }
                 .padding(14)
                 .background(
                     RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
-                        .fill(Color.ghibliCream)
+                        .fill(colorScheme == .dark ? Color.ghibliDarkBackground : Color.ghibliCream)
                         .overlay(
                             RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
                                 .stroke(Color.ghibliWarmEarth.opacity(0.3), lineWidth: 1)

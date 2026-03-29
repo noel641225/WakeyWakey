@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var alarmManager: AlarmManager
+    @Environment(\.colorScheme) var colorScheme
     @State private var showingResetAlert = false
     @StateObject private var headerAnimator = SpriteAnimator(fps: 3)
 
@@ -10,7 +11,9 @@ struct SettingsView: View {
         ZStack {
             // Warm cozy indoor background
             LinearGradient(
-                colors: [Color.ghibliCream, Color.ghibliParchment.opacity(0.8), Color.ghibliSoftSky.opacity(0.25)],
+                colors: colorScheme == .dark
+                    ? [Color.ghibliDarkBackground, Color.ghibliDarkCard.opacity(0.8), Color.ghibliDarkBackground]
+                    : [Color.ghibliCream, Color.ghibliParchment.opacity(0.8), Color.ghibliSoftSky.opacity(0.25)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -101,7 +104,7 @@ struct SettingsView: View {
                                 .padding(12)
                                 .background(
                                     RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
-                                        .fill(Color.ghibliCream)
+                                        .fill(colorScheme == .dark ? Color.ghibliDarkBackground : Color.ghibliCream)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: GhibliTheme.Radius.md)
                                                 .stroke(Color.ghibliWarmEarth.opacity(0.3), lineWidth: 1)
@@ -186,10 +189,10 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("設定")
                     .font(GhibliTheme.Typography.title(26))
-                    .foregroundColor(Color.ghibliDeepForest)
+                    .foregroundColor(colorScheme == .dark ? Color.ghibliDarkText : Color.ghibliDeepForest)
                 Text("個人化你的小屋")
                     .font(GhibliTheme.Typography.body(13))
-                    .foregroundColor(Color.ghibleBarkBrown.opacity(0.75))
+                    .foregroundColor(colorScheme == .dark ? Color.ghibliDarkText.opacity(0.7) : Color.ghibleBarkBrown.opacity(0.75))
             }
             Spacer()
             AnimatedCharacterView(animator: headerAnimator, size: 56)
