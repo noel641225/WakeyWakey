@@ -1,7 +1,7 @@
 import SwiftUI
 import PhotosUI
 
-// MARK: - Add Alarm View
+// MARK: - Add / Edit Alarm View
 struct AddAlarmView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
@@ -9,15 +9,31 @@ struct AddAlarmView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var ringtoneManager: RingtoneManager
 
-    @State private var alarmTime = Date()
-    @State private var alarmLabel = "起床啦！"
-    @State private var selectedRepeatDays: Set<Weekday> = []
-    @State private var selectedImageType: AlarmImageType = .defaultBunny
-    @State private var snoozeTaps: Int = 1
-    @State private var dismissTaps: Int = 3
-    @State private var moveSpeed: Double = 0.5
-    @State private var selectedRingtone: RingtoneSelection = .default
+    let editingAlarm: Alarm?
+
+    @State private var alarmTime: Date
+    @State private var alarmLabel: String
+    @State private var selectedRepeatDays: Set<Weekday>
+    @State private var selectedImageType: AlarmImageType
+    @State private var snoozeTaps: Int
+    @State private var dismissTaps: Int
+    @State private var moveSpeed: Double
+    @State private var selectedRingtone: RingtoneSelection
     @State private var showRingtonePicker = false
+
+    init(editingAlarm: Alarm? = nil) {
+        self.editingAlarm = editingAlarm
+        let alarm = editingAlarm
+        _alarmTime          = State(initialValue: alarm?.time ?? Date())
+        _alarmLabel         = State(initialValue: alarm?.label ?? "起床啦！")
+        _selectedRepeatDays = State(initialValue: Set(alarm?.repeatDays ?? []))
+        _selectedImageType  = State(initialValue: alarm?.imageType ?? .defaultBunny)
+        _snoozeTaps         = State(initialValue: alarm?.snoozeCount ?? 1)
+        _dismissTaps        = State(initialValue: alarm?.dismissCount ?? 3)
+        _moveSpeed          = State(initialValue: alarm?.moveSpeed ?? 0.5)
+        _selectedRingtone   = State(initialValue: alarm?.selectedRingtone ?? .default)
+    }
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -40,7 +56,7 @@ struct AddAlarmView: View {
                     .padding(18)
                 }
             }
-            .navigationTitle("新增鬧鐘")
+            .navigationTitle(editingAlarm != nil ? "編輯鬧鐘" : "新增鬧鐘")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -249,18 +265,35 @@ struct AddAlarmView: View {
 
     // MARK: - Save
     private func saveAlarm() {
-        let alarm = Alarm(
-            time: alarmTime,
-            isEnabled: true,
-            repeatDays: Array(selectedRepeatDays),
-            label: alarmLabel,
-            imageType: selectedImageType,
-            snoozeCount: snoozeTaps,
-            dismissCount: dismissTaps,
-            moveSpeed: moveSpeed,
-            selectedRingtone: selectedRingtone
-        )
-        alarmManager.addAlarm(alarm)
+        if let existing = editingAlarm {
+            // Update existing alarm, preserving its ID
+            let updated = Alarm(
+                id: existing.id,
+                time: alarmTime,
+                isEnabled: existing.isEnabled,
+                repeatDays: Array(selectedRepeatDays),
+                label: alarmLabel,
+                imageType: selectedImageType,
+                snoozeCount: snoozeTaps,
+                dismissCount: dismissTaps,
+                moveSpeed: moveSpeed,
+                selectedRingtone: selectedRingtone
+            )
+            alarmManager.updateAlarm(updated)
+        } else {
+            let alarm = Alarm(
+                time: alarmTime,
+                isEnabled: true,
+                repeatDays: Array(selectedRepeatDays),
+                label: alarmLabel,
+                imageType: selectedImageType,
+                snoozeCount: snoozeTaps,
+                dismissCount: dismissTaps,
+                moveSpeed: moveSpeed,
+                selectedRingtone: selectedRingtone
+            )
+            alarmManager.addAlarm(alarm)
+        }
         dismiss()
     }
 }

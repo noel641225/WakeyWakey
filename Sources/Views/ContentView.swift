@@ -6,6 +6,7 @@ struct ContentView: View {
     @EnvironmentObject var ringtoneManager: RingtoneManager
     @Environment(\.colorScheme) var colorScheme
     @State private var showingAddAlarm = false
+    @State private var editingAlarm: Alarm? = nil
     @State private var selectedTab = 0  // 0 = 鬧鐘, 1 = 設定
     @StateObject private var headerAnimator = SpriteAnimator(fps: 4)
     @StateObject private var emptyStateAnimator = SpriteAnimator(fps: 3)
@@ -31,6 +32,31 @@ struct ContentView: View {
                 .environmentObject(alarmManager)
                 .environmentObject(settingsManager)
                 .environmentObject(ringtoneManager)
+        }
+        .sheet(item: $editingAlarm) { alarm in
+            AddAlarmView(editingAlarm: alarm)
+                .environmentObject(alarmManager)
+                .environmentObject(settingsManager)
+                .environmentObject(ringtoneManager)
+        }
+        .alert("鬧鐘已過時", isPresented: Binding(
+            get: { alarmManager.pendingExpiredAlarms.first != nil },
+            set: { _ in }
+        )) {
+            Button("現在觸發") {
+                if let alarm = alarmManager.pendingExpiredAlarms.first {
+                    alarmManager.handleExpiredAlarm(alarm, shouldTrigger: true)
+                }
+            }
+            Button("忽略", role: .cancel) {
+                if let alarm = alarmManager.pendingExpiredAlarms.first {
+                    alarmManager.handleExpiredAlarm(alarm, shouldTrigger: false)
+                }
+            }
+        } message: {
+            if let alarm = alarmManager.pendingExpiredAlarms.first {
+                Text("\(alarm.timeString)\(alarm.label.isEmpty ? "" : " · \(alarm.label)") 的鬧鐘在應用關閉時已過時，要現在觸發嗎？")
+            }
         }
         .fullScreenCover(isPresented: Binding(
             get: { alarmManager.isAlarmTriggering && alarmManager.currentTriggeringAlarm != nil },
@@ -118,7 +144,7 @@ struct ContentView: View {
                     .listRowInsets(EdgeInsets())
             } else {
                 ForEach(alarmManager.alarms) { alarm in
-                    AlarmCard(alarm: alarm)
+                    AlarmCard(alarm: alarm, onEdit: { editingAlarm = alarm })
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 8, trailing: 20))

@@ -10,6 +10,7 @@ class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate
     @Published var alarms: [Alarm] = []
     @Published var isAlarmTriggering = false
     @Published var currentTriggeringAlarm: Alarm?
+    @Published var pendingExpiredAlarms: [Alarm] = []
 
     private let userDefaults = UserDefaults.standard
     private let alarmsKey = "savedAlarms"
@@ -18,7 +19,11 @@ class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate
     private var alarmAudioPlayer: AVAudioPlayer?
     private var alarmAudioEngine: AVAudioEngine?
     private var alarmToneNode: AVAudioPlayerNode?
-    
+
+    // In-app alarm check timer (fires every second when app is open)
+    private var checkTimer: Timer?
+    // Tracks alarms already fired in a given hour:minute to prevent double-trigger
+    private var firedAlarmKeys: Set<String> = []
 
     override init() {
         super.init()
@@ -26,14 +31,88 @@ class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate
         requestNotificationPermission()
         UNUserNotificationCenter.current().delegate = self
         registerNotificationCategories()
+        checkForExpiredAlarms()
+        startAlarmCheckTimer()
     }
 
     // MARK: - Permission
     private func requestNotificationPermission() {
+        // NOTE: Do NOT request .criticalAlert here — it requires a special Apple entitlement
+        // and causes the ENTIRE permission request to fail if the app doesn't have it.
         UNUserNotificationCenter.current().requestAuthorization(
-            options: [.alert, .sound, .badge, .criticalAlert]
-        ) { _, error in
+            options: [.alert, .sound, .badge]
+        ) { granted, error in
             if let error { print("Notification permission error: \(error)") }
+            if !granted { print("Notification permission denied by user") }
+        }
+    }
+
+    // MARK: - In-App Alarm Timer
+
+    private func startAlarmCheckTimer() {
+        let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.checkAlarms()
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        checkTimer = timer
+    }
+
+    private func checkAlarms() {
+        guard !isAlarmTriggering else { return }
+        let now = Date()
+        let calendar = Calendar.current
+        let nowComponents = calendar.dateComponents([.hour, .minute, .weekday], from: now)
+        guard let hour = nowComponents.hour, let minute = nowComponents.minute else { return }
+
+        for alarm in alarms where alarm.isEnabled {
+            let alarmComponents = calendar.dateComponents([.hour, .minute], from: alarm.time)
+            guard alarmComponents.hour == hour, alarmComponents.minute == minute else { continue }
+
+            // Deduplicate: don't fire the same alarm twice in the same minute
+            let key = "\(alarm.id)_\(hour)_\(minute)"
+            guard !firedAlarmKeys.contains(key) else { continue }
+
+            // For repeating alarms, verify today is a selected day
+            if !alarm.repeatDays.isEmpty {
+                guard let weekday = nowComponents.weekday,
+                      alarm.repeatDays.contains(where: { $0.rawValue == weekday }) else { continue }
+            }
+
+            firedAlarmKeys.insert(key)
+            triggerAlarm(alarm)
+            break // show one alarm at a time
+        }
+    }
+
+    // MARK: - Expired Alarm Detection
+    // Detects one-time alarms whose notification already fired while the app was closed.
+
+    private func checkForExpiredAlarms() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { [weak self] requests in
+            guard let self else { return }
+            let pendingIds = Set(requests.map { $0.identifier })
+            DispatchQueue.main.async {
+                // One-time alarms that are still enabled but have no pending notification
+                // likely fired while the app was closed (notification was consumed).
+                let expired = self.alarms.filter { alarm in
+                    alarm.isEnabled &&
+                    alarm.repeatDays.isEmpty &&
+                    !pendingIds.contains(alarm.id.uuidString)
+                }
+                self.pendingExpiredAlarms = expired
+            }
+        }
+    }
+
+    func handleExpiredAlarm(_ alarm: Alarm, shouldTrigger: Bool) {
+        pendingExpiredAlarms.removeAll { $0.id == alarm.id }
+        if shouldTrigger {
+            triggerAlarm(alarm)
+        } else {
+            if let index = alarms.firstIndex(where: { $0.id == alarm.id }) {
+                alarms[index].isEnabled = false
+                saveAlarms()
+            }
         }
     }
 
@@ -55,8 +134,25 @@ class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        if let alarm = alarm(for: response.notification.request.identifier) {
-            DispatchQueue.main.async { self.triggerAlarm(alarm) }
+        guard let alarm = alarm(for: response.notification.request.identifier) else {
+            completionHandler()
+            return
+        }
+        DispatchQueue.main.async {
+            switch response.actionIdentifier {
+            case "SNOOZE_ACTION":
+                self.snoozeAlarm(alarm: alarm, duration: 5)
+            case "DISMISS_ACTION":
+                // Disable one-time alarm when dismissed from notification
+                if alarm.repeatDays.isEmpty,
+                   let index = self.alarms.firstIndex(where: { $0.id == alarm.id }) {
+                    self.alarms[index].isEnabled = false
+                    self.saveAlarms()
+                }
+            default:
+                // User tapped the notification body — show AlarmFiringView
+                self.triggerAlarm(alarm)
+            }
         }
         completionHandler()
     }
@@ -122,7 +218,6 @@ class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate
         let content = UNMutableNotificationContent()
         content.title = "Wakey Wakey! ⏰"
         content.body = alarm.label.isEmpty ? "起床時間到囉！" : alarm.label
-        // Use custom sound file if available, otherwise default
         if alarm.selectedRingtone.type == .custom,
            let fileName = alarm.selectedRingtone.customFileName {
             content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: fileName))
@@ -195,22 +290,31 @@ class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate
     // MARK: - Trigger / Dismiss / Snooze
 
     func triggerAlarm(_ alarm: Alarm) {
+        guard !isAlarmTriggering else { return }
         currentTriggeringAlarm = alarm
         isAlarmTriggering = true
+
+        // Disable one-time alarms after firing so they don't re-trigger tomorrow
+        if alarm.repeatDays.isEmpty,
+           let index = alarms.firstIndex(where: { $0.id == alarm.id }) {
+            alarms[index].isEnabled = false
+            saveAlarms()
+        }
+
+        // Remove from expired list if it's there
+        pendingExpiredAlarms.removeAll { $0.id == alarm.id }
 
         // Vibrate
         AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
 
         // Play ringtone
         startRingtonePlayback(for: alarm.selectedRingtone)
-
     }
 
     func dismissAlarm() {
         stopRingtonePlayback()
         isAlarmTriggering = false
         currentTriggeringAlarm = nil
-
         UNUserNotificationCenter.current().setBadgeCount(0, withCompletionHandler: nil)
     }
 
@@ -315,7 +419,6 @@ class AlarmManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate
             .playback, mode: .default, options: [])
         try? AVAudioSession.sharedInstance().setActive(true)
     }
-    
 
     // MARK: - Debug
 
